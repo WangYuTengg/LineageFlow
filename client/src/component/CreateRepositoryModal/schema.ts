@@ -6,3 +6,7 @@ export const createRepositorySchema = z.object({
   storageNamespace: z.string().url(),
   defaultBranch: z.string().min(1, "Enter a default branch"),
 });
+
+export type CreateRepositorySchemaValues = z.infer<
+  typeof createRepositorySchema
+>;

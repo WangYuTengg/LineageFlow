@@ -2,10 +2,30 @@ import { useState } from "react";
 import { Group, Autocomplete, Button } from "@mantine/core";
 import { IconSearch, IconPlus } from "@tabler/icons-react";
 import CreateRepositoryModal from "../CreateRepositoryModal";
-
+import { CreateRepositorySchemaValues } from "../CreateRepositoryModal/schema";
 export default function Repository() {
   const [createRepository, setCreateRepository] = useState(false);
   const repositories = ["repo 1", "repo 2"];
+
+  async function handleCreateRepository(values: CreateRepositorySchemaValues) {
+    try {
+      const response = await fetch(
+        "http://localhost:5173/api/createRepository",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify(values),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create repository!");
+    }
+  }
 
   return (
     <>
@@ -32,6 +52,7 @@ export default function Repository() {
         <CreateRepositoryModal
           opened={createRepository}
           onClose={() => setCreateRepository(false)}
+          onCreateRepository={(values) => handleCreateRepository(values)}
         />
       )}
     </>

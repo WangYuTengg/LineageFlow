@@ -1,13 +1,18 @@
 import { Modal, TextInput, Button, Group, Stack, Text } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
-import { createRepositorySchema } from "./schema";
+import { createRepositorySchema, CreateRepositorySchemaValues } from "./schema";
 
 interface Props {
   opened: boolean;
   onClose(): void;
+  onCreateRepository(values: CreateRepositorySchemaValues): void;
 }
 
-export default function CreateRepositoryModal({ opened, onClose }: Props) {
+export default function CreateRepositoryModal({
+  opened,
+  onClose,
+  onCreateRepository,
+}: Props) {
   const form = useForm({
     initialValues: {
       repositoryName: "",
@@ -26,7 +31,7 @@ export default function CreateRepositoryModal({ opened, onClose }: Props) {
       onClose={onClose}
       title={<Text size="lg">Create a Repository</Text>}
     >
-      <form onSubmit={form.onSubmit((values) => console.log(values))}>
+      <form onSubmit={form.onSubmit((values) => onCreateRepository(values))}>
         <Stack gap="md">
           <TextInput
             size="md"
