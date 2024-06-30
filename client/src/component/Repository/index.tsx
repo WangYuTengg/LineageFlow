@@ -10,7 +10,7 @@ export default function Repository() {
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
       const response = await fetch(
-        "http://localhost:5173/api/createRepository",
+        "http://localhost:5173/api/createRepository/",
         {
           headers: {
             "Content-Type": "application/json",
