@@ -3,4 +3,6 @@ TikTok TechJam 2024
 
 Set up:
 
-1. cd into client -> run ```pnpm i``` -> run ```pnpm run dev``` to start local frontend client
+1. To run frontend: cd into client -> run ```pnpm i``` -> run ```pnpm run dev``` to start local
+2. server dependencies -> ``` pip install django ``` and ``` pip install "psycopg[binary]" ```
+3. To run backend: cd into server -> run ``` py manage.py runserver ```

@@ -1,4 +1,4 @@
-import { Group, Text, Autocomplete, Button } from "@mantine/core";
+import { Group, Autocomplete, Button } from "@mantine/core";
 import { IconSearch, IconPlus } from "@tabler/icons-react";
 export default function Repository() {
   const repositories = ["repo 1", "repo 2"];
