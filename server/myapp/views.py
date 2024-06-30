@@ -23,6 +23,7 @@ class CreateRepositoryView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# testing on the cloud db
 class TestView(APIView):
     def get(self,request):
         with connection.cursor() as cursor:
@@ -30,4 +31,4 @@ class TestView(APIView):
             rows = cursor.fetchall()
             columns = [col[0] for col in cursor.description]
             result = [dict(zip(columns, row)) for row in rows]
-        return Response(result, status=status.HTTP_201_CREATED)
+        return Response(result, status=status.HTTP_201_OK)
