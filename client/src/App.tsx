@@ -1,10 +1,15 @@
 import "@mantine/core/styles.css";
-import { MantineProvider, DEFAULT_THEME } from "@mantine/core";
+import { MantineProvider, DEFAULT_THEME, Stack } from "@mantine/core";
+import Navbar from "./component/Navbar";
+import Repository from "./component/Repository";
 
 export default function App() {
   return (
     <MantineProvider theme={DEFAULT_THEME} defaultColorScheme="dark">
-      Hello world
+      <Stack p="md">
+        <Navbar />
+        <Repository />
+      </Stack>
     </MantineProvider>
   );
 }
