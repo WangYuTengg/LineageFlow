@@ -13,7 +13,19 @@ export default function Repository() {
         leftSection={<IconSearch />}
       />
 
-      <Button size="md" leftSection={<IconPlus />} variant="light" color="teal">
+      <Button
+        size="md"
+        leftSection={<IconPlus />}
+        variant="light"
+        color="teal"
+        onClick={async () => {
+          const response = await fetch("http://localhost:5173/api/hello/", {
+            method: "GET",
+          });
+          const result = await response.text();
+          console.log(result);
+        }}
+      >
         Create a Repository
       </Button>
     </Group>
