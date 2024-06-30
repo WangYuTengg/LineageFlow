@@ -3,7 +3,11 @@ import { Group, Autocomplete, Button } from "@mantine/core";
 import { IconSearch, IconPlus } from "@tabler/icons-react";
 import CreateRepositoryModal from "../CreateRepositoryModal";
 import { CreateRepositorySchemaValues } from "../CreateRepositoryModal/schema";
-export default function Repository() {
+
+interface Props {
+  onCreateRepository: (values: CreateRepositorySchemaValues) => void;
+}
+export default function CreateRepository({ onCreateRepository }: Props) {
   const [createRepository, setCreateRepository] = useState(false);
   const repositories = ["repo 1", "repo 2"];
 
@@ -20,7 +24,14 @@ export default function Repository() {
         }
       );
       const data = await response.json();
-      console.log(data);
+      if (response.ok) {
+        console.log(data);
+        onCreateRepository(data.repository_data);
+        alert(data.message);
+        setCreateRepository(false);
+      } else {
+        alert("Failed to create repository!");
+      }
     } catch (error) {
       console.error(error);
       alert("Failed to create repository!");

@@ -17,6 +17,7 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
+import { Link, useNavigate } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconTruck,
@@ -68,6 +69,7 @@ export default function Navbar() {
     useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
+  const navigate = useNavigate();
 
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>
@@ -102,9 +104,9 @@ export default function Navbar() {
           </Group>
 
           <Group h="100%" gap={0} visibleFrom="sm">
-            <a href="#" className={classes.link}>
+            <Link to="/" className={classes.link}>
               Home
-            </a>
+            </Link>
             <HoverCard
               width={600}
               position="bottom"
@@ -144,8 +146,10 @@ export default function Navbar() {
           </Group>
 
           <Group visibleFrom="sm">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            <Button variant="default" onClick={() => navigate("/login")}>
+              Log in
+            </Button>
+            <Button onClick={() => navigate("/signup")}>Sign up</Button>
           </Group>
 
           <Burger
@@ -168,9 +172,10 @@ export default function Navbar() {
         <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
           <Divider my="sm" />
 
-          <a href="#" className={classes.link}>
+          <Link to="/" className={classes.link}>
+            {" "}
             Home
-          </a>
+          </Link>
           <UnstyledButton className={classes.link} onClick={toggleLinks}>
             <Center inline>
               <Box component="span" mr={5}>
@@ -186,8 +191,10 @@ export default function Navbar() {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            <Button variant="default" onClick={() => navigate("/login")}>
+              Log in
+            </Button>
+            <Button onClick={() => navigate("/signup")}>Sign up</Button>
           </Group>
         </ScrollArea>
       </Drawer>
