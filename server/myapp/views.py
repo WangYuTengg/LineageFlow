@@ -69,7 +69,7 @@ class RangeView(APIView):
 class MetaView(APIView):
     def get(self,request):
         metas = MetaRange.objects.all()
-        serializer = RangeSerializer(metas, many=True)
+        serializer = MetaRangeSerializer(metas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self,request):
@@ -95,7 +95,7 @@ class CommitView(APIView):
 class BranchView(APIView):
     def get(self,request):
         branches = Branch.objects.all()
-        serializer = BranchSerializer(Branch, many=True)
+        serializer = BranchSerializer(branches, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self,request):

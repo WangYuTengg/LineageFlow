@@ -43,13 +43,6 @@ class RangeSerializer(serializers.ModelSerializer):
         range_instance.files.set(files_data)
         return range_instance
 
-    def update(self, instance, validated_data):
-        files_data = validated_data.pop('files')
-        instance.range_id = validated_data.get('range_id', instance.range_id)
-        instance.save()
-        instance.files.set(files_data)
-        return instance
-
 
 class MetaRangeSerializer(serializers.ModelSerializer):
     ranges = serializers.PrimaryKeyRelatedField(queryset=Range.objects.all(), many=True)
@@ -64,13 +57,6 @@ class MetaRangeSerializer(serializers.ModelSerializer):
         meta_range_instance.ranges.set(ranges_data)
         return meta_range_instance
 
-    def update(self, instance, validated_data):
-        ranges_data = validated_data.pop('ranges')
-        instance.meta_id = validated_data.get('meta_id', instance.meta_id)
-        instance.save()
-        instance.ranges.set(ranges_data)
-        return instance
-
 
 class CommitSerializer(serializers.ModelSerializer):
     meta_id = serializers.PrimaryKeyRelatedField(queryset=MetaRange.objects.all())
@@ -82,14 +68,6 @@ class CommitSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         commit_instance = Commit.objects.create(**validated_data)
         return commit_instance
-
-    def update(self, instance, validated_data):
-        meta_data = validated_data.pop('meta_id')
-        meta_instance, created = MetaRange.objects.get_or_create(**meta_data)
-        instance.meta_id = meta_instance
-        instance.commit_id = validated_data.get('commit_id', instance.commit_id)
-        instance.save()
-        return instance
 
 
 class BranchSerializer(serializers.ModelSerializer):
