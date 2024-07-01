@@ -43,7 +43,7 @@ class TestView(APIView):
 class FilesView(APIView):
     def get(self,request):
         files = Files.objects.all() #change according to whtv condition
-        serializer = ItemSerializer(files, many=True)
+        serializer = FilesSerializer(files, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self,request):

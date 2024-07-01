@@ -23,7 +23,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
 class FilesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Item
+        model = Files
         fields = ['url', 'meta_data']
     
     def create(self, validated_data):
