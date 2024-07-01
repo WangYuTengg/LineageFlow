@@ -49,7 +49,6 @@ export default function CreateRepositoryModal({
           <TextInput
             size="md"
             label="Storage Namespace"
-            withAsterisk
             placeholder="local://example-bucket/"
             {...form.getInputProps("storageNamespace")}
           />

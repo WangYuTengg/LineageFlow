@@ -5,7 +5,7 @@ from .models import Item, Files, Range, MetaRange, Commit, Branch
 class RepositorySerializer(serializers.Serializer):
     repositoryName = serializers.CharField(max_length=100)
     description = serializers.CharField(max_length=300, allow_blank=True)
-    storageNamespace = serializers.CharField(max_length=100)
+    storageNamespace = serializers.CharField(max_length=100, allow_blank = True)
     defaultBranch = serializers.CharField(default="main")
 
     def create(self, validated_data):
