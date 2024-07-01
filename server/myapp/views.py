@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RepositorySerializer
 from django.db import connection
+from .models import Item
 
 
 class HelloWorldView(APIView):
@@ -27,8 +28,8 @@ class CreateRepositoryView(APIView):
 class TestView(APIView):
     def get(self,request):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM test")
+            cursor.execute("SELECT * FROM myapp_item")
             rows = cursor.fetchall()
             columns = [col[0] for col in cursor.description]
             result = [dict(zip(columns, row)) for row in rows]
-        return Response(result, status=status.HTTP_201_OK)
+        return Response(result, status=status.HTTP_200_OK)
