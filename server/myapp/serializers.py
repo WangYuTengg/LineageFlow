@@ -1,17 +1,6 @@
 from rest_framework import serializers
-from .models import Item, Files, Range, MetaRange, Commit, Branch
+from .models import Item, Files, Range, MetaRange, Commit, Branch, Repo
 
-
-class RepositorySerializer(serializers.Serializer):
-    repositoryName = serializers.CharField(max_length=100)
-    description = serializers.CharField(max_length=300, allow_blank=True)
-    storageNamespace = serializers.CharField(max_length=100, allow_blank = True)
-    defaultBranch = serializers.CharField(default="main")
-
-    def create(self, validated_data):
-        # TODO: Here you would typically create a database record
-        # return Repository.objects.create(**validated_data)
-        return
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -88,3 +77,14 @@ class BranchSerializer(serializers.ModelSerializer):
         instance.branch_name = validated_data.get('branch_name', instance.branch_name)
         instance.save()
         return instance
+    
+
+class RepositorySerializer(serializers.ModelSerializer):
+    default_branch = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all())
+
+    class Meta:
+        model = Repo
+        fields = ['repo_name', 'description', 'default_branch', 'gc_bucket']
+
+    def create(self, validated_data):
+        return Repo.objects.create(**validated_data)

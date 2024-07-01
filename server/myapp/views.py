@@ -13,18 +13,16 @@ class HelloWorldView(APIView):
 
 
 class CreateRepositoryView(APIView):
-    def post(self, request):
-        print(request.data)
+    def post(self,request):
         serializer = RepositorySerializer(data=request.data)
         if serializer.is_valid():
-            # data = serializer.save()
+            serializer.save()
             response_data = {
-                "message": "Repository created successfully",
-                "repository_data": serializer.data,
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # testing on the cloud db
 class TestView(APIView):
@@ -34,11 +32,14 @@ class TestView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self,request):
-        print(request.data)
         serializer = ItemSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FilesView(APIView):
@@ -51,7 +52,11 @@ class FilesView(APIView):
         serializer = FilesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 class RangeView(APIView):
@@ -64,7 +69,11 @@ class RangeView(APIView):
         serializer = RangeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 class MetaView(APIView):
@@ -77,7 +86,11 @@ class MetaView(APIView):
         serializer = MetaRangeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CommitView(APIView):
@@ -90,7 +103,11 @@ class CommitView(APIView):
         serializer = CommitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class BranchView(APIView):
@@ -103,6 +120,10 @@ class BranchView(APIView):
         serializer = BranchSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "Data Inserted Successfully",
+                "data": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
