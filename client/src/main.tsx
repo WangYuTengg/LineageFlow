@@ -4,10 +4,11 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { MantineProvider, DEFAULT_THEME, Stack } from "@mantine/core";
 import "./index.css";
 import "@mantine/core/styles.css";
-import App from "./app";
+import App from "./App";
 import Navbar from "./component/Navbar";
 import LoginForm from "./component/Login";
 import SignUpForm from "./component/Signup";
+import RepsitoriesPage from "./routes/repositories";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/" element={<App />} />
+            <Route path="/repositories" element={<RepsitoriesPage />} />
           </Routes>
         </Stack>
       </MantineProvider>

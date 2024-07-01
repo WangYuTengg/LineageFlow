@@ -14,6 +14,7 @@ class HelloWorldView(APIView):
 
 class CreateRepositoryView(APIView):
     def post(self, request):
+        print(request.data)
         serializer = RepositorySerializer(data=request.data)
         if serializer.is_valid():
             # data = serializer.save()

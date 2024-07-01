@@ -13,6 +13,7 @@ export default function CreateRepository({ onCreateRepository }: Props) {
 
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
+      console.log(values)
       const response = await fetch(
         "http://localhost:5173/api/createRepository/",
         {
