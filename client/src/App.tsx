@@ -2,7 +2,7 @@ import { Stack, Group, Text, Anchor } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import CreateRepository from "./component/CreateRepository";
-import RepositoryPage from "./component/Repository";
+import Tabs from "./component/Tabs";
 
 interface Repository {
   repositoryName: string;
@@ -44,7 +44,7 @@ export default function App() {
               {repositories[0].repositoryName}
             </Text>
           </Group>
-          <RepositoryPage />
+          <Tabs />
         </Stack>
       )}
     </>
