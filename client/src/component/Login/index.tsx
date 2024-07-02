@@ -28,7 +28,7 @@ export default function LoginForm() {
           },
         });
         if (response.ok) {
-          login();
+          login(values.username);
           setShouldRedirect(true);
         } else alert("Invalid username or password");
       })}

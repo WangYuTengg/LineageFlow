@@ -1,10 +1,10 @@
-// src/context/AuthContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: () => void;
+  userName: string;
+  login: (name: string) => void;
   logout: () => void;
 }
 
@@ -12,12 +12,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("");
 
-  const login = () => setIsLoggedIn(true);
-  const logout = () => setIsLoggedIn(false);
+  const login = (name: string) => {
+    setIsLoggedIn(true);
+    setUserName(name);
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    setUserName("");
+  };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userName, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
