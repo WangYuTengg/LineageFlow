@@ -7,6 +7,8 @@ import {
   SimpleGrid,
   ThemeIcon,
   Anchor,
+  Stack,
+  Avatar,
   Divider,
   Center,
   Box,
@@ -30,6 +32,7 @@ import {
   IconChevronDown,
 } from "@tabler/icons-react";
 import classes from "./Navbar.module.css";
+import { useAuth } from "../../auth";
 
 const mockdata = [
   {
@@ -65,6 +68,7 @@ const mockdata = [
 ];
 
 export default function Navbar() {
+  const { isLoggedIn, userName, logout } = useAuth();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
@@ -145,12 +149,22 @@ export default function Navbar() {
             </HoverCard>
           </Group>
 
-          <Group visibleFrom="sm">
-            <Button variant="default" onClick={() => navigate("/login")}>
-              Log in
-            </Button>
-            <Button onClick={() => navigate("/signup")}>Sign up</Button>
-          </Group>
+          {!isLoggedIn ? (
+            <Group visibleFrom="sm">
+              <Button variant="default" onClick={() => navigate("/login")}>
+                Log in
+              </Button>
+              <Button onClick={() => navigate("/signup")}>Sign up</Button>
+            </Group>
+          ) : (
+            <Group visibleFrom="sm">
+              <Text>
+                Logged in as <b>{userName}</b>
+              </Text>
+              <Avatar size={36} radius="xl" src="https://i.pravatar.cc/300" />
+              <Button onClick={() => logout()}>Log out</Button>
+            </Group>
+          )}
 
           <Burger
             opened={drawerOpened}
@@ -190,12 +204,23 @@ export default function Navbar() {
           <Collapse in={linksOpened}>{links}</Collapse>
           <Divider my="sm" />
 
-          <Group justify="center" grow pb="xl" px="md">
-            <Button variant="default" onClick={() => navigate("/login")}>
-              Log in
-            </Button>
-            <Button onClick={() => navigate("/signup")}>Sign up</Button>
-          </Group>
+          {!isLoggedIn ? (
+            <Group justify="center" grow pb="xl" px="md">
+              <Button variant="default" onClick={() => navigate("/login")}>
+                Log in
+              </Button>
+              <Button onClick={() => navigate("/signup")}>Sign up</Button>
+            </Group>
+          ) : (
+            //todo: style this better
+            <Stack justify="center" pb="xl" px="md">
+              <Text>
+                Logged in as <b>{userName}</b>
+              </Text>
+              <Avatar size={60} radius="xl" src="https://i.pravatar.cc/300" />
+              <Button onClick={() => logout()}>Log out</Button>{" "}
+            </Stack>
+          )}
         </ScrollArea>
       </Drawer>
     </Box>

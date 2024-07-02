@@ -13,7 +13,6 @@ export default function CreateRepository({ onCreateRepository }: Props) {
 
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
-      console.log(values)
       const response = await fetch(
         "http://localhost:5173/api/createRepository/",
         {
@@ -24,6 +23,7 @@ export default function CreateRepository({ onCreateRepository }: Props) {
           body: JSON.stringify(values),
         }
       );
+      console.log(response);
       const data = await response.json();
       if (response.ok) {
         console.log(data);

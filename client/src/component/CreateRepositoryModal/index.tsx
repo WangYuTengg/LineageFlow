@@ -15,10 +15,10 @@ export default function CreateRepositoryModal({
 }: Props) {
   const form = useForm({
     initialValues: {
-      repositoryName: "",
+      repo_name: "",
       description: "",
-      storageNamespace: "",
-      defaultBranch: "main",
+      gc_bucket: "",
+      default_branch: "main",
     },
     validate: zodResolver(createRepositorySchema),
   });
@@ -38,7 +38,7 @@ export default function CreateRepositoryModal({
             label="Repository Name"
             withAsterisk
             placeholder="Enter repository name"
-            {...form.getInputProps("repositoryName")}
+            {...form.getInputProps("repo_name")}
           />
           <TextInput
             size="md"
@@ -50,13 +50,13 @@ export default function CreateRepositoryModal({
             size="md"
             label="Storage Namespace"
             placeholder="local://example-bucket/"
-            {...form.getInputProps("storageNamespace")}
+            {...form.getInputProps("gc_bucket")}
           />
           <TextInput
             size="md"
             label="Default Branch"
             withAsterisk
-            {...form.getInputProps("defaultBranch")}
+            {...form.getInputProps("default_branch")}
           />
           <Group>
             <Button color="teal" variant="light" size="md" type="submit">

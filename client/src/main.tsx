@@ -8,22 +8,30 @@ import App from "./App";
 import Navbar from "./component/Navbar";
 import LoginForm from "./component/Login";
 import SignUpForm from "./component/Signup";
-import RepsitoriesPage from "./routes/repositories";
+import { AuthProvider, ProtectedRoute } from "./auth";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <MantineProvider theme={DEFAULT_THEME} defaultColorScheme="dark">
-        <Stack p="xs">
-          <Navbar />
-          <Routes>
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/signup" element={<SignUpForm />} />
-            <Route path="/" element={<App />} />
-            <Route path="/repositories" element={<RepsitoriesPage />} />
-          </Routes>
-        </Stack>
-      </MantineProvider>
+      <AuthProvider>
+        <MantineProvider theme={DEFAULT_THEME} defaultColorScheme="dark">
+          <Stack p="xs">
+            <Navbar />
+            <Routes>
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/signup" element={<SignUpForm />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <App />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Stack>
+        </MantineProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );
