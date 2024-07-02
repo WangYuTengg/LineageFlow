@@ -4,7 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { MantineProvider, DEFAULT_THEME, Stack } from "@mantine/core";
 import "./index.css";
 import "@mantine/core/styles.css";
-import App from "./app";
+import App from "./App";
 import Navbar from "./component/Navbar";
 import LoginForm from "./component/Login";
 import SignUpForm from "./component/Signup";
