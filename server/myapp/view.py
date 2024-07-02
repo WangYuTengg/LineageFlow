@@ -55,28 +55,6 @@ class TestView(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-<<<<<<< HEAD:server/myapp/view.py
-=======
-
-class FilesView(APIView):
-    def get(self, request):
-        files = Files.objects.all()  # change according to whtv condition
-        serializer = FilesSerializer(files, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = FilesSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            response_data = {
-                "message": "Data Inserted Successfully",
-                "data": serializer.data,
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
->>>>>>> 4ac4a7151a236d040ada07f55b2a8994db77ef46:server/myapp/views.py
 class RangeView(APIView):
     def get(self, request):
         ranges = Range.objects.all()
