@@ -28,7 +28,7 @@ class Range(models.Model):
 
 class MetaRange(models.Model):
     meta_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    ranges = models.ManyToManyField(Range)
+    ranges = models.ManyToManyField(Range, default=[])
 
     def __str__(self):
         return self.meta_id
@@ -47,7 +47,8 @@ class Commit(models.Model):
 
 
 class Branch(models.Model):
-    branch_name = models.CharField(max_length=100, primary_key=True)
+    branch_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    branch_name = models.CharField(max_length=100)
     created_timestamp = models.DateTimeField(auto_now_add=True)
     updated_timestamp = models.DateTimeField(auto_now=True)
     commit_id = models.ForeignKey(
@@ -62,7 +63,8 @@ class Branch(models.Model):
 
 
 class Repo(models.Model):
-    repo_name = models.CharField(max_length=100, primary_key=True)
+    repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    repo_name = models.CharField(max_length=100)
     description = models.TextField(default="")
     default_branch = models.ForeignKey(
         Branch, on_delete=models.CASCADE, related_name="branch"
@@ -71,3 +73,23 @@ class Repo(models.Model):
 
     def __str__(self):
         return self.repo_name
+    
+class Users(models.Model):
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    repos = models.ManyToManyField(Repo, default=[])
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.name
+    
+
+class UserToRepo(models.Model):
+    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo")
+    user_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name = "user")
+    role = models.CharField(max_length=100, default="admin") #what other roles
+
+    def __str__(self):
+        return self.role
+
