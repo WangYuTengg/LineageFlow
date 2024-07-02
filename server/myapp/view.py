@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RepositorySerializer, ItemSerializer, FilesSerializer, RangeSerializer, MetaRangeSerializer, CommitSerializer, BranchSerializer
 from django.db import connection
-from .models import Item, Files, Range, MetaRange, Commit, Branch
+from .models import Item, Range, MetaRange, Commit, Branch
 
 
 class HelloWorldView(APIView):
@@ -41,19 +41,6 @@ class TestView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class FilesView(APIView):
-    def get(self,request):
-        files = Files.objects.all() #change according to whtv condition
-        serializer = FilesSerializer(files, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self,request):
-        serializer = FilesSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
 class RangeView(APIView):
     def get(self,request):
         ranges = Range.objects.all()
