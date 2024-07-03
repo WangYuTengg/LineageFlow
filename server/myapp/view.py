@@ -4,15 +4,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
     RepositorySerializer,
-    ItemSerializer,
+    # ItemSerializer,
     FilesSerializer,
     RangeSerializer,
     MetaRangeSerializer,
     CommitSerializer,
     BranchSerializer,
+    UserSerializer
 )
-from django.db import connection
-from .models import Item, Range, MetaRange, Commit, Branch
+from .models import Item, Range, MetaRange, Commit, Branch, Users, UserToRepo, Repo
 
 
 class HelloWorldView(APIView):
@@ -22,6 +22,9 @@ class HelloWorldView(APIView):
 
 class CreateRepositoryView(APIView):
     def post(self, request):
+        '''request body needs username, repo name, default branch name 
+        optional: '''
+        username = request.data.pop("username")
         serializer = RepositorySerializer(data=request.data)
         print(request.data)
         if serializer.is_valid():
@@ -38,22 +41,22 @@ class CreateRepositoryView(APIView):
 
 
 # testing on the cloud db
-class TestView(APIView):
-    def get(self, request):
-        items = Item.objects.all()
-        serializer = ItemSerializer(items, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class TestView(APIView):
+#     def get(self, request):
+#         items = Item.objects.all()
+#         serializer = ItemSerializer(items, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        serializer = ItemSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            response_data = {
-                "message": "Data Inserted Successfully",
-                "data": serializer.data,
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request):
+#         serializer = ItemSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             response_data = {
+#                 "message": "Data Inserted Successfully",
+#                 "data": serializer.data,
+#             }
+#             return Response(response_data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RangeView(APIView):
     def get(self, request):
@@ -127,11 +130,30 @@ class BranchView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginAdminView(APIView):
+class LoginAdminView(APIView): 
+    def get(self, request):
+        username = request.query_params.get("username")
+        pw = request.query_params.get("password")
+        #TODO; include the hashing later on
+        user = Users.objects.filter(username=username).values("password","repos")
+        if user[0].get("password") == pw:
+            response_data = {
+                "message": "Login Successfully",
+                "data": user[0]
+            }
+        else:
+            response_data = {
+                "message": "Invalid credentials"}
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+class createUserView(APIView):
     def post(self, request):
-        if (
-            request.data.get("username") == "admin"
-            and request.data.get("password") == "admin"
-        ):
-            return Response(request.data, status=status.HTTP_200_OK)
-        return Response("Invalid credentials", status=status.HTTP_401_UNAUTHORIZED)
+        user_instance = UserSerializer(data=request.data)
+        if user_instance.is_valid():
+            user_instance.save()
+            response_data = {
+                    "message": "User Created Successfully!",
+                    "data": user_instance.data
+                }
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)

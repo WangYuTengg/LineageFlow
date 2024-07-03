@@ -78,7 +78,7 @@ class Branch(models.Model):
 
 class Users(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
     repos = models.ManyToManyField(Repo, default=[])
     email = models.EmailField()

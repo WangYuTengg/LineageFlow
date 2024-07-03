@@ -1,16 +1,16 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from .models import Item, Files, Range, MetaRange, Commit, Branch, Repo
+from .models import Item, Files, Range, MetaRange, Commit, Branch, Repo, Users
 from django.db import transaction, IntegrityError
 
 
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = ["name", "description"]
+# class ItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Item
+#         fields = ["name", "description"]
 
-    def create(self, validated_data):
-        return Item.objects.create(**validated_data)
+#     def create(self, validated_data):
+#         return Item.objects.create(**validated_data)
 
 
 class FilesSerializer(serializers.ModelSerializer):
@@ -87,7 +87,7 @@ class RepositorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Repo
-        fields = ["repo_name", "description", "default_branch"]
+        fields = ["repo_name", "description", "default_branch", "bucket_url"]
 
     def create(self, validated_data):
         try:
@@ -113,3 +113,31 @@ class RepositorySerializer(serializers.ModelSerializer):
             raise ValidationError(
                 {"unexpected_error": f"An unexpected error occurred: {str(e)}"}
             )
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Users
+        fields = ["username", "password", "email", "repos"]
+    
+    def create(self, validated_data):
+        try:
+            name = validated_data.pop("username")
+            pw = validated_data.pop("password")
+            email = validated_data.pop("email")
+
+            user_acc = Users.objects.create(username=name, password=pw, email=email)
+            return user_acc
+
+        except IntegrityError as e:
+            print(f"An integrity error occurred: {str(e)}")
+            raise ValidationError(
+                {"database_error": "A database integrity error occurred."}
+            )
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {str(e)}")
+            raise ValidationError(
+                {"unexpected_error": f"An unexpected error occurred: {str(e)}"}
+            )
+
+
