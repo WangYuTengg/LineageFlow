@@ -48,8 +48,8 @@ export default function CreateRepositoryModal({
           />
           <TextInput
             size="md"
-            label="Storage Namespace"
-            placeholder="local://example-bucket/"
+            label="Google cloud bucket"
+            placeholder="https://storage.googleapis.com/examplebucket/"
             {...form.getInputProps("gc_bucket")}
           />
           <TextInput

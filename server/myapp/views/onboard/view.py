@@ -1,25 +1,27 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from .serializer import CreateRepositorySerializer
 from myapp.serializers import FilesSerializer
-from rest_framework.views import APIView # type: ignore
-from rest_framework.response import Response # type: ignore
-from rest_framework import status # type: ignore
 from myapp.models import Files
-from .gcs_utils import GCS
-from .serializer import BucketRequestSerializer
+import logging
 
-gcs = GCS() 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 class OnboardingView(APIView):
-    def get(self,request):
-        files = Files.objects.all() #change according to whtv condition
-        serializer = FilesSerializer(files, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self,request):
-        serializer = BucketRequestSerializer(data = request.data)
-        if serializer.is_valid():   
-            bucket_url = request.data.get("bucket_url")
-            objects = gcs.list_gcs_objects(bucket_url)
-            ranges = gcs.group_into_ranges(objects)
-            return Response(ranges, status = status.HTTP_201_CREATED)
-
+    def post(self, request):
+        serializer = CreateRepositorySerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                repo = serializer.save()
+                response_serializer = CreateRepositorySerializer(repo)
+                logger.info("Post request handled successfully. Data: %s", response_serializer.data)
+                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            except ValidationError as e:
+                logger.error("Validation error: %s", e.detail)
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.erros, status = status.HTTP_400_BAD_REQUEST)
+            logger.error("Serializer validation failed. Errors: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

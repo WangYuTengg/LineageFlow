@@ -68,7 +68,6 @@ class Repo(models.Model):
     default_branch = models.ForeignKey(
         Branch, on_delete=models.CASCADE, related_name="branch"
     )
-    gc_bucket = models.URLField(default="")
 
     def __str__(self):
         return self.repo_name

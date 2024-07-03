@@ -87,7 +87,7 @@ class RepositorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Repo
-        fields = ["repo_name", "description", "default_branch", "gc_bucket"]
+        fields = ["repo_name", "description", "default_branch"]
 
     def create(self, validated_data):
         try:
