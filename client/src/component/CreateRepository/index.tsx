@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Group, Autocomplete, Button } from "@mantine/core";
-import { IconSearch, IconPlus } from "@tabler/icons-react";
+import { Group, Button } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import CreateRepositoryModal from "../CreateRepositoryModal";
 import { CreateRepositorySchemaValues } from "../CreateRepositoryModal/schema";
 
@@ -9,20 +9,16 @@ interface Props {
 }
 export default function CreateRepository({ onCreateRepository }: Props) {
   const [createRepository, setCreateRepository] = useState(false);
-  const repositories = ["repo 1", "repo 2"];
 
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
-      const response = await fetch(
-        "http://localhost:5173/api/onboard/",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch("/api/onboard/", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(values),
+      });
       console.log(response);
       const data = await response.json();
       if (response.ok) {
@@ -41,15 +37,7 @@ export default function CreateRepository({ onCreateRepository }: Props) {
 
   return (
     <>
-      <Group justify="space-between" px="md">
-        <Autocomplete
-          label="Search your repositories"
-          data={repositories}
-          placeholder="Start typing..."
-          size="md"
-          leftSection={<IconSearch />}
-        />
-
+      <Group justify="flex-end" px="md">
         <Button
           size="md"
           leftSection={<IconPlus />}
