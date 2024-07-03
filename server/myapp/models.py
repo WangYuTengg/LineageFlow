@@ -37,6 +37,9 @@ class Commit(models.Model):
     commit_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     meta_id = models.OneToOneField(MetaRange, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    add = models.ManyToManyField(Files, default=[], related_name="add_set")
+    edit = models.ManyToManyField(Files, default=[], related_name="edit_set") #TODO how to differentiate different versions of files with same name
+    remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
 
     class Meta:
         ordering = ["-timestamp"]
@@ -44,6 +47,17 @@ class Commit(models.Model):
     def __str__(self):
         return self.commit_id
 
+
+class Repo(models.Model):
+    repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    repo_name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(null=True)
+    default_branch = models.CharField(max_length=100)
+    bucket_url = models.URLField(null=True)
+
+    def __str__(self):
+        return self.repo_name
+    
 
 class Branch(models.Model):
     branch_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -53,6 +67,7 @@ class Branch(models.Model):
     commit_id = models.ForeignKey(
         Commit, on_delete=models.CASCADE, related_name="commits"
     )
+    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo", null=False)
 
     class Meta:
         ordering = ["-created_timestamp"]
@@ -61,31 +76,20 @@ class Branch(models.Model):
         return self.branch_name
 
 
-class Repo(models.Model):
-    repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    repo_name = models.CharField(max_length=100)
-    description = models.TextField(default="")
-    default_branch = models.ForeignKey(
-        Branch, on_delete=models.CASCADE, related_name="branch"
-    )
-
-    def __str__(self):
-        return self.repo_name
-    
 class Users(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
     repos = models.ManyToManyField(Repo, default=[])
     email = models.EmailField()
 
     def __str__(self):
-        return self.name
+        return self.user_id
     
 
 class UserToRepo(models.Model):
-    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo")
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name = "user")
+    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo_user")
     role = models.CharField(max_length=100, default="admin") #what other roles
 
     def __str__(self):
