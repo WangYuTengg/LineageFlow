@@ -80,10 +80,11 @@ WSGI_APPLICATION = "server.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',    
-        'HOST': '34.142.232.65',
-        'USER': 'postgres',    
-        'PASSWORD': 'gbeZ6mr#uXvRF%r(',
-        'NAME': 'vc_db',
+        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
+        'USER': 'postgres.bvcgtqvemtcaswvakiys',    
+        'PASSWORD': 'RwUv3pdsH3YbioDG',
+        'NAME': 'postgres',
+        'PORT': '6543'
     }
 }
 
