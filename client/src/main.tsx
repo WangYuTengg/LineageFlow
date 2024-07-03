@@ -20,14 +20,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route path="/signup" element={<SignUpForm />} />
-              <Route
+              {/* <Route
                 path="/"
                 element={
                   <ProtectedRoute>
                     <App />
                   </ProtectedRoute>
                 }
-              />
+              /> */}
+                <Route path="/" element={<App />} />
             </Routes>
           </Stack>
         </MantineProvider>

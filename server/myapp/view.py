@@ -131,7 +131,7 @@ class BranchView(APIView):
 
 
 class LoginAdminView(APIView): 
-    def get(self, request):
+    def post(self, request):
         username = request.query_params.get("username")
         pw = request.query_params.get("password")
         #TODO; include the hashing later on
@@ -157,3 +157,4 @@ class createUserView(APIView):
                 }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)
+
