@@ -14,7 +14,7 @@ export default function CreateRepository({ onCreateRepository }: Props) {
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
       const response = await fetch(
-        "http://localhost:5173/api/createRepository/",
+        "http://localhost:5173/api/onboard/",
         {
           headers: {
             "Content-Type": "application/json",
