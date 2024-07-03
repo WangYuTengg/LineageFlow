@@ -3,7 +3,7 @@ import logging
 from myapp.models import Repo, MetaRange, Commit, Branch, Range, Files
 from django.db import transaction, IntegrityError
 from rest_framework.exceptions import ValidationError
-from .gcs_utils import GCS
+from ...gcs_utils import GCS
 
 logger = logging.getLogger(__name__)
 class CreateRepositorySerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
 
             if bucket_url:
                 gcs = GCS()
-                objects = gcs.list_gcs_objects(bucket_url)
+                objects = gcs.list_gcs_objects_from_prefix(bucket_url)
                 ranges = gcs.group_into_ranges(objects)
             
             with transaction.atomic():

@@ -17,7 +17,7 @@ export default function CreateRepositoryModal({
     initialValues: {
       repo_name: "",
       description: "",
-      gc_bucket: "",
+      bucket_url: "",
       default_branch: "main",
     },
     validate: zodResolver(createRepositorySchema),
@@ -50,7 +50,7 @@ export default function CreateRepositoryModal({
             size="md"
             label="Google cloud bucket"
             placeholder="https://storage.googleapis.com/examplebucket/"
-            {...form.getInputProps("gc_bucket")}
+            {...form.getInputProps("bucket_url")}
           />
           <TextInput
             size="md"

@@ -1,7 +1,7 @@
 import { Group, Select, Button } from "@mantine/core";
 import { GoUpload } from "react-icons/go";
 import { useState, useEffect } from "react";
-import UploadObjectModal from "../UploadObjectModal";
+import UploadObjectModal from "./UploadObjectModal";
 
 type Branch = string | null;
 

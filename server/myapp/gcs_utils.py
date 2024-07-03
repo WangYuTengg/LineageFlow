@@ -5,6 +5,12 @@ import requests
 class GCS:
     def __init__(self):
         self.client = storage.Client()
+        
+    def upload_to_gcs(self, file, object_name, bucket_link):
+        bucket = self.client.bucket(bucket_link)
+        blob = bucket.blob(object_name)
+        blob.upload_from_file(file)
+        return blob.public_url
 
     def get_bucket_name(self, bucket_link):
         # Extract bucket name from URL
@@ -12,12 +18,32 @@ class GCS:
         if match:
             return match.group(1)
         raise ValueError("Invalid bucket URL")
+    
+    def get_file_metadata(self, bucket_link, object_name):
+        bucket = self.client.bucket(self.get_bucket_name(bucket_link))
+        blob = bucket.blob(object_name)
+        
+        metadata = {
+            "name": blob.name,
+            "size": blob.size,
+            "content_type": blob.content_type,
+            "updated": blob.updated.isoformat(),
+            "generation": blob.generation,
+            "metageneration": blob.metageneration
+        }
+        
+        return metadata
+    
+    def create_bucket(self, bucket_name):
+        bucket = self.client.bucket(bucket_name)
+        new_bucket = self.client.create_bucket(bucket)
+        return new_bucket.name, f"https://storage.googleapis.com/{new_bucket.name}/"
 
-    def list_gcs_objects(self, bucket_link):
+    def list_gcs_objects_from_prefix(self, bucket_link, prefix=None):
         bucket_name = self.get_bucket_name(bucket_link)
         bucket = self.client.bucket(bucket_name)
 
-        blobs = bucket.list_blobs()
+        blobs = bucket.list_blobs(prefix=prefix)
         objects_metadata = []
 
         for blob in blobs:
@@ -67,6 +93,10 @@ class GCS:
             ranges.append(current_range)
 
         return ranges
+    
+    def bucket_exists(self, bucket_name):
+        bucket = self.client.bucket(bucket_name)
+        return bucket.exists()
 
 def send_metadata_to_api(bucket_url, metadata):
     url = "http://your-api-endpoint.com/your-endpoint"
