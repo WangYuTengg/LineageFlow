@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
+import CreateRepository from "../component/create-repo-button";
 
 interface Repository {
   repo_name: string;
@@ -88,7 +89,10 @@ export default function Repositories() {
 
   return (
     <Stack p="xl">
-      <Title order={2}>Your repositories</Title>
+      <Group justify="space-between">
+        <Title order={2}>Your repositories</Title>
+        <CreateRepository />
+      </Group>
       {RenderRepositories}
     </Stack>
   );

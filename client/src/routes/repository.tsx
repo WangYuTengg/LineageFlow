@@ -1,7 +1,6 @@
 import { Stack, Group, Anchor } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import CreateRepository from "../component/create-repo-button";
 import RepositoryPage from "../component/repository-page";
 import { type Repository } from "../schema";
 import { useAuth } from "../auth";
@@ -22,7 +21,6 @@ export default function Repository() {
 
   return (
     <>
-      <CreateRepository />
       <Stack px="sm">
         <Group bg="gray" p="md">
           <Anchor

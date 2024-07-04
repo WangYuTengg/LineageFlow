@@ -41,7 +41,7 @@ export default function CreateRepository() {
           color="teal"
           onClick={() => setCreateRepository(true)}
         >
-          Create a Repository
+          Add Repository
         </Button>
       </Group>
       {createRepository && (
