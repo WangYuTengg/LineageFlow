@@ -18,7 +18,7 @@ import { Repository } from "../schema";
 interface Props {
   repository: Repository;
 }
-export default function RepositoryPage({ repository }: Props) {
+export default function ObjectsPage({ repository }: Props) {
   const [uploadObject, setUploadObject] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(
     repository.default_branch

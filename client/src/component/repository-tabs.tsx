@@ -8,7 +8,7 @@ import {
   IconCircleCaretRight,
   IconSettings,
 } from "@tabler/icons-react";
-import RepositoryPage from "./repository-page";
+import RepositoryPage from "./objects-page";
 import { Repository } from "../schema";
 
 const iconStyle = { width: rem(16), height: rem(16) };
