@@ -8,7 +8,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
@@ -45,6 +45,31 @@ export default function Repositories() {
       created_at: new Date().toLocaleDateString(),
     },
   ]);
+
+  useEffect(() => {
+    async function fetchRepositories() {
+      try {
+        const response = await fetch(`user/fetchRepositories/${userName}/`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+        });
+        console.log(response);
+        const data = await response.json();
+        console.log(data);
+        if (response.ok && data.repositories) {
+          setRepositories(data.repositories);
+        } else {
+          console.error(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchRepositories();
+  }, [userName]);
 
   const RenderRepositories = repositories.map((repo) => {
     const createdAt = repo.created_at ? new Date(repo.created_at) : null;
@@ -93,7 +118,13 @@ export default function Repositories() {
         <Title order={2}>Your repositories</Title>
         <CreateRepository />
       </Group>
-      {RenderRepositories}
+      {repositories.length ? (
+        RenderRepositories
+      ) : (
+        <Text p="xl" c="dimmed" size="xl">
+          No repositories found
+        </Text>
+      )}
     </Stack>
   );
 }
