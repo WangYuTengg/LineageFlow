@@ -3,6 +3,8 @@ import json
 import re
 import requests
 import os
+from rest_framework.exceptions import ValidationError
+
 class GCS:
     def __init__(self):
         self.client = storage.Client()
@@ -36,9 +38,30 @@ class GCS:
         return metadata
     
     def create_bucket(self, bucket_name):
-        bucket = self.client.bucket(bucket_name)
-        new_bucket = self.client.create_bucket(bucket)
-        return new_bucket.name, f"https://storage.googleapis.com/{new_bucket.name}/"
+            # Convert the bucket name to lowercase and replace invalid characters
+            bucket_name = bucket_name.lower().replace('_', '-')
+            
+            # Remove any characters that are not allowed
+            bucket_name = re.sub(r'[^a-z0-9-.]', '', bucket_name)
+
+            # Ensure the bucket name is within the allowed length
+            bucket_name = bucket_name[:63]
+
+            # Ensure the bucket name starts and ends with a letter or number
+            if not re.match(r'^[a-z0-9]', bucket_name):
+                bucket_name = 'a' + bucket_name
+            if not re.match(r'[a-z0-9]$', bucket_name):
+                bucket_name = bucket_name + 'a'
+            
+            # Ensure the bucket name is at least 3 characters long
+            if len(bucket_name) < 3:
+                bucket_name += 'a' * (3 - len(bucket_name))
+
+            try:
+                new_bucket = self.client.create_bucket(bucket_name)
+                return new_bucket.name, f"https://storage.googleapis.com/{new_bucket.name}/"
+            except Exception as e:
+                raise ValidationError({"unexpected_error": f"An unexpected error occurred: {str(e)}"})
 
     def list_gcs_objects_from_prefix(self, bucket_link, prefix=None):
         bucket_name = self.get_bucket_name(bucket_link)

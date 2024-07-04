@@ -4,11 +4,11 @@ from myapp.gcs_utils import GCS
 import os
 class UploadObjectView(APIView):
     def post(self, request):
-        repo = request.data.get('repo')
+        repo_name = request.data.get('repo')
         branch = request.data.get('branch')
         file = request.FILES.get('file')
         
-        repo_id = Repo.objects.get(repo)
+        repo_id = Repo.objects.get(repo_name)
         branch_id = Branch.objects.get(branch)
         
         gcs = GCS() 

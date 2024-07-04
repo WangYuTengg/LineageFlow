@@ -68,7 +68,7 @@ export default function Repositories() {
 
   const RenderRepositories = repositories.map((repo) => {
     const handleClick = () => {
-      navigate(`/u/${userName}/r/${repo.repo_name}`);
+      navigate(`/u/${userName}/r/${repo.repo_name}`, { state: { repo } });
     };
 
     return (

@@ -34,7 +34,7 @@ const tabsData = [
 export function RepositoryTabs({ selectedRepository }: Props) {
   return (
     <Tabs defaultValue="objects" variant="outline">
-      <Tabs.List justify="flex-start">
+      <Tabs.List>
         {tabsData.map((tab) => (
           <Tabs.Tab
             key={tab.value}

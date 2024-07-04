@@ -6,6 +6,7 @@ export interface Repository {
   default_branch: string;
   branches: string[];
   created_at?: string;
+  storage_bucket_url?: string;
 }
 
 export const createRepositorySchema = z.object({
@@ -40,3 +41,11 @@ export type UploadObjectModalSchemaValues = z.infer<
 export type CreateRepositorySchemaValues = z.infer<
   typeof createRepositorySchema
 >;
+
+export interface Branch {
+  branch_name: string;
+  created_timestamp: string;
+  updated_timestamp: string;
+  commit_id: string;
+  repo_id: string;
+}

@@ -18,23 +18,29 @@ import { Repository } from "../schema";
 interface Props {
   repository: Repository;
 }
+
 export default function ObjectsPage({ repository }: Props) {
   const [uploadObject, setUploadObject] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(
     repository.default_branch
   );
 
+  // Transform branches array to the format required by the Select component
+  const branchOptions = repository.branches.map((branch) => ({
+    value: branch,
+    label: branch,
+  }));
+
   return (
     <Stack px="8%">
       <Group justify="space-between" mt="md">
         <Select
-          data={repository.branches}
+          data={branchOptions}
           value={selectedBranch}
           onChange={(value) => setSelectedBranch(value)}
           size="sm"
         />
         <Group>
-          {" "}
           <ActionIcon
             size="lg"
             variant="subtle"
@@ -72,8 +78,8 @@ export default function ObjectsPage({ repository }: Props) {
       </Card>
       {uploadObject && (
         <UploadObjectModal
-          repo="test-repo"
-          branch="main"
+          repo={repository.repo_name}
+          branch={selectedBranch || repository.default_branch}
           opened={uploadObject}
           onClose={() => setUploadObject(false)}
         />

@@ -182,7 +182,7 @@ class GetRepoView(APIView):
         print("User Repos:", repo_ids)
 
         repos = Repo.objects.filter(repo_id__in=repo_ids)
-        repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description} for repo in repos]
+        repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description, "storage_bucket_url": repo.bucket_url} for repo in repos]
         
         response_data = {}
         for repo in repo_data:

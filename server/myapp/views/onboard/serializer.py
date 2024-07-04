@@ -14,20 +14,25 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
     bucket_url = serializers.URLField(required=False, allow_blank=True, default="")
     repo_name = serializers.CharField(write_only=True)
     description = serializers.CharField(write_only=False, allow_blank=True, default="")
+    storage_bucket_name = serializers.CharField(required=True, write_only = True)
 
     class Meta:
         model = Repo
-        fields = ["repo_name", "description", "default_branch", "bucket_url", "username"]
+        fields = ["repo_name", "description", "default_branch", "bucket_url", "username", "storage_bucket_name"]
 
     def create(self, validated_data):
         try:
             branch_name = validated_data.pop("default_branch")
             bucket_url = validated_data.pop("bucket_url", "")
             username = validated_data.pop("username")
+            storage_bucket_name = validated_data.pop('storage_bucket_name')
+            
             objects = None
             ranges = None
+            gcs = GCS()
+            storage_bucket_link = gcs.create_bucket(bucket_name=storage_bucket_name)
+            
             if bucket_url:
-                gcs = GCS()
                 objects = gcs.list_gcs_objects_from_prefix(bucket_url)
                 ranges = gcs.group_into_ranges(objects)
 
@@ -52,7 +57,7 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
                 user = Users.objects.get(username = username)
 
                 commit = Commit.objects.create(meta_id=meta_range)
-                repo = Repo.objects.create(**validated_data)
+                repo = Repo.objects.create(**validated_data, bucket_url = storage_bucket_link)
                 
                 userToRepo = UserToRepo.objects.create(user_id = user, repo_id = repo)
                 

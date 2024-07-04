@@ -57,6 +57,13 @@ export default function CreateRepositoryModal({
           />
           <TextInput
             size="md"
+            label="Storage bucket name"
+            placeholder="TechJam"
+            withAsterisk
+            {...form.getInputProps("storage_bucket_name")}
+          />
+          <TextInput
+            size="md"
             label="Default Branch"
             withAsterisk
             {...form.getInputProps("default_branch")}
