@@ -23,15 +23,17 @@ class HelloWorldView(APIView):
 
 class CreateRepositoryView(APIView):
     def post(self, request):
-        '''request body needs username, repo name, default branch name 
-        optional: bucket_url, description'''
-        
+        """request body needs username, repo name, default branch name
+        optional: bucket_url, description"""
+
         username = request.data.pop("username")
         try:
             user = Users.objects.get(username=username)
         except Users.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
         repo_instance = RepositorySerializer(data=request.data)
         if repo_instance.is_valid():
             repo_instance.save()
@@ -41,7 +43,7 @@ class CreateRepositoryView(APIView):
             # TODO create the usertorepo
             response_data = {
                 "message": "Repo Created Successfully",
-                "data": repo_instance.data
+                "data": repo_instance.data,
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
@@ -66,6 +68,7 @@ class CreateRepositoryView(APIView):
 #             }
 #             return Response(response_data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class RangeView(APIView):
     def get(self, request):
@@ -110,12 +113,10 @@ class CommitView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        repo_name = request.data.get('repo_name')
-        branch = request.data.get('branch')
-        file = request.FILES.get('file')
-        
-        
-        
+        repo_name = request.data.get("repo_name")
+        branch = request.data.get("branch")
+        file = request.FILES.get("file")
+
         serializer = CommitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -134,12 +135,16 @@ class BranchView(APIView):
         try:
             repo_list = Users.objects.get(username=username).repos
         except Users.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
         try:
             repo_instance = repo_list.get(repo_name=repo)
         except Repo.DoesNotExist:
-            return Response({"error": "Repository not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Repository not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         branches = Branch.objects.filter(repo_id=repo_instance)
         serializer = BranchSerializer(branches, many=True)
@@ -156,31 +161,28 @@ class BranchView(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LoginAdminView(APIView): 
+
+class LoginAdminView(APIView):
     def post(self, request):
-        username = request.query_params.get("username")
-        pw = request.query_params.get("password")
-        #TODO; include the hashing later on
-        user = Users.objects.filter(username=username).values("password","repos")
+        username = request.data.get("username")
+        pw = request.data.get("password")
+        # TODO; include the hashing later on
+        user = Users.objects.filter(username=username).values("password", "repos")
         if user[0].get("password") == pw:
-            response_data = {
-                "message": "Login Successfully",
-                "data": user[0]
-            }
+            response_data = {"message": "Login Successfully", "data": user[0]}
         else:
-            response_data = {
-                "message": "Invalid credentials"}
+            response_data = {"message": "Invalid credentials"}
         return Response(response_data, status=status.HTTP_200_OK)
-    
+
+
 class CreateUserView(APIView):
     def post(self, request):
         user_instance = UserSerializer(data=request.data)
         if user_instance.is_valid():
             user_instance.save()
             response_data = {
-                    "message": "User Created Successfully!",
-                    "data": user_instance.data
-                }
+                "message": "User Created Successfully!",
+                "data": user_instance.data,
+            }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)
-
