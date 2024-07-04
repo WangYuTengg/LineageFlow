@@ -62,6 +62,7 @@ class MetaRangeSerializer(serializers.ModelSerializer):
 
 class CommitSerializer(serializers.ModelSerializer):
     meta_id = serializers.PrimaryKeyRelatedField(queryset=MetaRange.objects.all())
+    branch_id = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all())
 
     class Meta:
         model = Commit

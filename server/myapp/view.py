@@ -110,6 +110,12 @@ class CommitView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        repo_name = request.data.get('repo_name')
+        branch = request.data.get('branch')
+        file = request.FILES.get('file')
+        
+        
+        
         serializer = CommitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
