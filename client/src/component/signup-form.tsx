@@ -25,6 +25,7 @@ export default function SignUpForm() {
 
       if (!response.ok) {
         alert(`Error: ${response.statusText}`);
+        return;
       }
 
       const data = await response.json();
