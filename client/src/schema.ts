@@ -27,6 +27,13 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter a password"),
 });
 
+export const signupSchema = z.object({
+  username: z.string().min(1, "Enter a username"),
+  password: z.string().min(1, "Enter a password"),
+  email: z.string().email("Enter a valid email address"),
+});
+
+export type SignupSchemaValues = z.infer<typeof signupSchema>;
 export type UploadObjectModalSchemaValues = z.infer<
   typeof uploadObjectModalSchema
 >;
