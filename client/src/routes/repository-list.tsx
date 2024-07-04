@@ -49,12 +49,15 @@ export default function Repositories() {
   useEffect(() => {
     async function fetchRepositories() {
       try {
-        const response = await fetch(`user/fetchRepositories/${userName}/`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "GET",
-        });
+        const response = await fetch(
+          `http://localhost:5173/api/user/fetchRepositories/${userName}/`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "GET",
+          }
+        );
         console.log(response);
         const data = await response.json();
         console.log(data);
