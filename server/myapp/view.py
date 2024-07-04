@@ -129,28 +129,36 @@ class CommitView(APIView):
 
 
 class BranchView(APIView):
-    def get(self, request):
-        username = request.query_params.get("username")
-        repo = request.query_params.get("repo_name")
-        try:
-            repo_list = Users.objects.get(username=username).repos
-        except Users.DoesNotExist:
-            return Response(
-                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+    # def get(self, request):
+    #     username = request.query_params.get("username")
+    #     repo = request.query_params.get("repo_name")
+    #     try:
+    #         repo_list = Users.objects.get(username=username).repos
+    #     except Users.DoesNotExist:
+    #         return Response(
+    #             {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+    #         )
 
-        try:
-            repo_instance = repo_list.get(repo_name=repo)
-        except Repo.DoesNotExist:
-            return Response(
-                {"error": "Repository not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        branches = Branch.objects.filter(repo_id=repo_instance)
-        serializer = BranchSerializer(branches, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     try:
+    #         repo_instance = repo_list.get(repo_name=repo)
+    #     except Repo.DoesNotExist:
+    #         return Response(
+    #             {"error": "Repository not found"}, status=status.HTTP_404_NOT_FOUND
+    #         )
+    #     branches = Branch.objects.filter(repo_id=repo_instance)
+    #     serializer = BranchSerializer(branches, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        username = request.data.pop("username")
+        repo = request.data.pop("repo_name")
+        parent = request.data.pop("parent")
+        
+        repo_list = Users.objects.get(username=username).repos
+        repo_id = repo_list.get(repo_name=repo)
+        
+        #the new branch will point to that commit
+        old_commit = Branch.objects.get(repo_id=repo_id, branch_name=parent).values("commit_id")
         serializer = BranchSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -161,17 +169,36 @@ class BranchView(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class GetRepoView(APIView):
+    def get(self, request):
+        username = request.query_params.get("username")
+        try:
+            user = Users.objects.get(username=username)
+        except Users.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        repo_names = Repo.objects.filter(pk__in=user.repos.all()).values()
+        #get the relevant branches from 
+        response_data = {}
+        for repo in repo_names:
+            branches = Branch.objects.filter(repo_id=repo.get("repo_id"))
+            serializer = BranchSerializer(branches, many=True)
+            resp_data = {"details": repo}
+            resp_data["branches"] = serializer.data
+            response_data[repo.get("repo_name")] = resp_data
+            
+        return Response(response_data, status=status.HTTP_200_OK)
+
 
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get("username")
         pw = request.data.get("password")
         # TODO; include the hashing later on
-        user = Users.objects.filter(username=username).values("password", "repos")
+        user = Users.objects.filter(username=username).values("password")
         if user[0].get("password") == pw:
-            response_data = {"message": "Login Successfully", "data": user[0]}
-            return Response(response_data, status=status.HTTP_200_OK)
-
+            response_data = {"message": "Login Successfully"}
         else:
             response_data = {"message": "Invalid credentials"}
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)

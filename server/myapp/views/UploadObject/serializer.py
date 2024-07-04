@@ -1,4 +1,4 @@
-from rest_fromwork import serializers
+from rest_framework import serializers
 from myapp.models import Commit
 from myapp.gcs_utils import GCS
 
