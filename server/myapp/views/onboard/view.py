@@ -10,15 +10,18 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
+
 class OnboardingView(APIView):
     def post(self, request):
         serializer = CreateRepositorySerializer(data=request.data)
         if serializer.is_valid():
             try:
                 repo = serializer.save()
-                response_serializer = CreateRepositorySerializer(repo)
-                logger.info("Post request handled successfully. Data: %s", response_serializer.data)
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+                logger.info(
+                    "Post request handled successfully. Data: %s",
+                    serializer.data,
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             except ValidationError as e:
                 logger.error("Validation error: %s", e.detail)
                 return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
