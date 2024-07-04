@@ -20,7 +20,7 @@ export default function CreateRepository() {
       const data = await response.json();
       if (response.ok) {
         console.log(data);
-        alert(data.message);
+        alert("Successfuly created repository!");
         setCreateRepository(false);
       } else {
         alert("Failed to create repository!");
