@@ -162,7 +162,7 @@ class BranchView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginAdminView(APIView):
+class LoginView(APIView):
     def post(self, request):
         username = request.data.get("username")
         pw = request.data.get("password")
