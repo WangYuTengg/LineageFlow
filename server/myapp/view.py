@@ -123,7 +123,19 @@ class CommitView(APIView):
 
 class BranchView(APIView):
     def get(self, request):
-        branches = Branch.objects.all()
+        username = request.query_params.get("username")
+        repo = request.query_params.get("repo_name")
+        try:
+            repo_list = Users.objects.get(username=username).repos
+        except Users.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            repo_instance = repo_list.get(repo_name=repo)
+        except Repo.DoesNotExist:
+            return Response({"error": "Repository not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        branches = Branch.objects.filter(repo_id=repo_instance)
         serializer = BranchSerializer(branches, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -132,12 +144,11 @@ class BranchView(APIView):
         if serializer.is_valid():
             serializer.save()
             response_data = {
-                "message": "Data Inserted Successfully",
+                "message": "Branch Created Successfully",
                 "data": serializer.data,
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginAdminView(APIView): 
     def post(self, request):
