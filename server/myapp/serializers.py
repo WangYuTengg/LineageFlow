@@ -82,14 +82,8 @@ class BranchSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         #TODO NOT tested ! 
-        username = validated_data.pop("username")
-        repo = validated_data.pop("repo_name")
         
-        repo_list = Users.objects.get(username=username).repos
-        repo_id = repo_list.get(repo_name=repo)
-        
-        #the new branch will point to that commit
-        branch_instance = Branch.objects.create(repo_id=repo_id, **validated_data)
+        branch_instance = Branch.objects.create(repo_id=repo_id, commit_id=old_commit, **validated_data)
         return branch_instance
 
     def update(self, instance, validated_data):
