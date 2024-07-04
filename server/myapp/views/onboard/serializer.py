@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import logging
-from myapp.models import Repo, MetaRange, Commit, Branch, Range, Files
+from myapp.models import Repo, MetaRange, Commit, Branch, Range, Files, Users, UserToRepo
 from django.db import transaction, IntegrityError
 from rest_framework.exceptions import ValidationError
 from ...gcs_utils import GCS
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateRepositorySerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required = True, write_only = True)
     default_branch = serializers.CharField(write_only=True)
     bucket_url = serializers.URLField(required=False, allow_blank=True, default="")
     repo_name = serializers.CharField(write_only=True)
@@ -16,12 +17,13 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Repo
-        fields = ["repo_name", "description", "default_branch", "bucket_url"]
+        fields = ["repo_name", "description", "default_branch", "bucket_url", "username"]
 
     def create(self, validated_data):
         try:
             branch_name = validated_data.pop("default_branch")
             bucket_url = validated_data.pop("bucket_url", "")
+            username = validated_data.pop("username")
             objects = None
             ranges = None
             if bucket_url:
@@ -46,9 +48,14 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
 
                 meta_range = MetaRange.objects.create()
                 meta_range.ranges.set(ranges_list)
+                
+                user = Users.objects.get(username = username)
 
                 commit = Commit.objects.create(meta_id=meta_range)
                 repo = Repo.objects.create(**validated_data)
+                
+                userToRepo = UserToRepo.objects.create(user_id = user, repo_id = repo)
+                
                 branch = Branch.objects.create(
                     branch_name=branch_name, commit_id=commit, repo_id=repo
                 )

@@ -4,17 +4,25 @@ import { IconPlus } from "@tabler/icons-react";
 import CreateRepositoryModal from "./create-repo-modal";
 import { CreateRepositorySchemaValues } from "../schema";
 
-export default function CreateRepository() {
+interface CreateRepositoryProps {
+  username: string;
+}
+
+const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
   const [createRepository, setCreateRepository] = useState(false);
 
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
     try {
+      const payload = {
+        username, 
+        ...values,
+      };
       const response = await fetch("/api/onboard/", {
         headers: {
           "Content-Type": "application/json",
         },
         method: "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
       console.log(response);
       const data = await response.json();
@@ -54,3 +62,5 @@ export default function CreateRepository() {
     </>
   );
 }
+
+export default CreateRepository;

@@ -168,7 +168,6 @@ class BranchView(APIView):
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class GetRepoView(APIView):
     def get(self, request):
         username = request.query_params.get("username")
@@ -178,15 +177,20 @@ class GetRepoView(APIView):
             return Response(
                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        repo_names = Repo.objects.filter(pk__in=user.repos.all()).values()
-        #get the relevant branches from 
+        
+        repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list('repo_id', flat=True)
+        print("User Repos:", repo_ids)
+
+        repos = Repo.objects.filter(repo_id__in=repo_ids)
+        repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description} for repo in repos]
+        
         response_data = {}
-        for repo in repo_names:
-            branches = Branch.objects.filter(repo_id=repo.get("repo_id"))
+        for repo in repo_data:
+            branches = Branch.objects.filter(repo_id=repo["repo_id"])
             serializer = BranchSerializer(branches, many=True)
             resp_data = {"details": repo}
             resp_data["branches"] = serializer.data
-            response_data[repo.get("repo_name")] = resp_data
+            response_data[repo["repo_name"]] = resp_data
             
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -199,6 +203,7 @@ class LoginView(APIView):
         user = Users.objects.filter(username=username).values("password")
         if user[0].get("password") == pw:
             response_data = {"message": "Login Successfully"}
+            return Response(response_data, status=status.HTTP_200_OK)
         else:
             response_data = {"message": "Invalid credentials"}
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)

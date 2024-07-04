@@ -56,7 +56,7 @@ class Repo(models.Model):
     bucket_url = models.URLField(null=True)
 
     def __str__(self):
-        return self.repo_name
+        return self.repo_id, self.repo_name
     
 
 class Branch(models.Model):

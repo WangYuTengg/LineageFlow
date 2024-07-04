@@ -13,44 +13,32 @@ import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
 
+interface Branch {
+  branch_name: string;
+  created_timestamp: string;
+  updated_timestamp: string;
+  commit_id: string;
+  repo_id: string;
+}
+
 interface Repository {
+  repo_id: string;
   repo_name: string;
   description: string;
-  bucket_url: string;
-  default_branch: string;
-  branches: string[];
-  created_at: string | null;
+  branches: Branch[];
 }
 
 export default function Repositories() {
   const navigate = useNavigate();
   const { userName } = useAuth();
 
-  // todo: fetch repositories from the server
-  const [repositories, setRepositories] = useState<Repository[]>([
-    {
-      repo_name: "test",
-      description: "test description",
-      bucket_url: "https://test-bucket.com",
-      default_branch: "main",
-      branches: ["main", "branch1", "branch2"],
-      created_at: new Date().toLocaleDateString(),
-    },
-    {
-      repo_name: "test 2",
-      description: "test description 2",
-      bucket_url: "https://test-bucket.com",
-      default_branch: "main",
-      branches: ["main", "branch1", "branch2"],
-      created_at: new Date().toLocaleDateString(),
-    },
-  ]);
+  const [repositories, setRepositories] = useState<Repository[]>([]);
 
   useEffect(() => {
     async function fetchRepositories() {
       try {
         const response = await fetch(
-          `http://localhost:5173/api/user/fetchRepositories/${userName}/`,
+          `http://localhost:8000/api/getAllRepo?username=${userName}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -61,8 +49,12 @@ export default function Repositories() {
         console.log(response);
         const data = await response.json();
         console.log(data);
-        if (response.ok && data.repositories) {
-          setRepositories(data.repositories);
+        if (response.ok) {
+          const formattedData = Object.keys(data).map((key) => ({
+            ...data[key].details,
+            branches: data[key].branches,
+          }));
+          setRepositories(formattedData);
         } else {
           console.error(data);
         }
@@ -75,24 +67,12 @@ export default function Repositories() {
   }, [userName]);
 
   const RenderRepositories = repositories.map((repo) => {
-    const createdAt = repo.created_at ? new Date(repo.created_at) : null;
-    const createdAtStr =
-      createdAt && !isNaN(createdAt.getTime())
-        ? createdAt.toISOString()
-        : "Invalid date";
-
     const handleClick = () => {
       navigate(`/u/${userName}/r/${repo.repo_name}`);
     };
 
     return (
-      <Card
-        key={repo.repo_name}
-        withBorder
-        shadow="lg"
-        padding="lg"
-        radius="md"
-      >
+      <Card key={repo.repo_id} withBorder shadow="lg" padding="lg" radius="md">
         <Anchor
           size="xl"
           onClick={handleClick}
@@ -103,13 +83,30 @@ export default function Repositories() {
         <Divider my="xs" />
         <Box px="lg">
           <Text size="lg" fw={500}>
-            Created at: {new Date(createdAtStr).toLocaleDateString()},{" "}
-            {new Date(createdAtStr).toLocaleTimeString()}
+            Repository ID: {repo.repo_id}
           </Text>
-          <Group>
-            <Text c="dimmed">Default branch: {repo.default_branch},</Text>
-            <Text c="dimmed">Storage namespace: {repo.bucket_url}</Text>
-          </Group>{" "}
+          <Text size="lg" fw={500}>
+            Description: {repo.description}
+          </Text>
+          <Text size="lg" fw={500}>
+            Branches:
+          </Text>
+          {repo.branches.map((branch) => (
+            <Box key={branch.branch_name} px="lg">
+              <Text size="md" fw={500}>
+                Branch Name: {branch.branch_name}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Created at: {new Date(branch.created_timestamp).toLocaleString()}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Updated at: {new Date(branch.updated_timestamp).toLocaleString()}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Commit ID: {branch.commit_id}
+              </Text>
+            </Box>
+          ))}
         </Box>
       </Card>
     );
@@ -119,7 +116,7 @@ export default function Repositories() {
     <Stack p="xl">
       <Group justify="space-between">
         <Title order={2}>Your repositories</Title>
-        <CreateRepository />
+        <CreateRepository username={userName} />
       </Group>
       {repositories.length ? (
         RenderRepositories

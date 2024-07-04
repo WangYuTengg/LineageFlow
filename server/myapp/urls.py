@@ -20,5 +20,4 @@ urlpatterns = [
     path("onboard/", OnboardingView.as_view(), name="onboard"),
     path("signup/", CreateUserView.as_view(), name="sign-up"),
     path("getAllRepo/", GetRepoView.as_view(), name="get-repos"),
-
 ]
