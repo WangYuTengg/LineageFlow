@@ -13,7 +13,7 @@ export default function SignUpForm() {
     validate: zodResolver(signupSchema),
   });
 
-  const handleLogin = async (values: SignupSchemaValues) => {
+  const handleSignup = async (values: SignupSchemaValues) => {
     try {
       const response = await fetch("/api/signup/", {
         headers: {
@@ -28,16 +28,14 @@ export default function SignUpForm() {
         return;
       }
 
-      const data = await response.json();
       alert("Sign up successful! Please login to continue.");
       navigate("/login");
-      console.log("Sign up successful", data);
     } catch (error) {
       alert(`Error: ${error}`);
     }
   };
   return (
-    <form onSubmit={form.onSubmit(async (values) => handleLogin(values))}>
+    <form onSubmit={form.onSubmit(async (values) => handleSignup(values))}>
       <Stack gap="md" justify="center" align="center">
         <Text ta="center" size="xl">
           Sign up

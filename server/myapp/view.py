@@ -170,9 +170,11 @@ class LoginView(APIView):
         user = Users.objects.filter(username=username).values("password", "repos")
         if user[0].get("password") == pw:
             response_data = {"message": "Login Successfully", "data": user[0]}
+            return Response(response_data, status=status.HTTP_200_OK)
+
         else:
             response_data = {"message": "Invalid credentials"}
-        return Response(response_data, status=status.HTTP_200_OK)
+            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CreateUserView(APIView):
