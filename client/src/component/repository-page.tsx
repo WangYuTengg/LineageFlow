@@ -12,8 +12,8 @@ import {
 } from "@mantine/core";
 import { IconRefresh, IconUpload } from "@tabler/icons-react";
 import { useState } from "react";
-import UploadObjectModal from "./UploadObjectModal";
-import { Repository } from "../../schema";
+import UploadObjectModal from "./upload-object-modal";
+import { Repository } from "../schema";
 
 interface Props {
   repository: Repository;

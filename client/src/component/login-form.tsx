@@ -1,9 +1,9 @@
 import { Text, TextInput, Stack, Button } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
-import { loginSchema } from "./schema";
-import { useAuth } from "../../auth";
+import { useAuth } from "../auth";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
+import { loginSchema } from "../schema";
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -14,7 +14,7 @@ export default function LoginForm() {
   });
 
   if (shouldRedirect) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={`/u/${form.values.username}/repositories`} replace />;
   }
 
   return (
@@ -56,7 +56,7 @@ export default function LoginForm() {
         />
         <Button w={400} type="submit">
           Login
-        </Button>{" "}
+        </Button>
       </Stack>
     </form>
   );

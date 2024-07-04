@@ -1,0 +1,40 @@
+import { Stack, Group, Anchor } from "@mantine/core";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import CreateRepository from "../component/create-repo-button";
+import RepositoryPage from "../component/repository-page";
+import { type Repository } from "../schema";
+import { useAuth } from "../auth";
+
+export default function Repository() {
+  const navigate = useNavigate();
+  const { userName } = useAuth();
+  const { repo_name } = useParams();
+
+  const [repository, setRepository] = useState<Repository>({
+    repo_name: "test",
+    description: "test description",
+    bucket_url: "https://test-bucket.com",
+    default_branch: "main",
+    branches: ["main", "branch1", "branch2"],
+    created_at: new Date().toLocaleDateString(),
+  });
+
+  return (
+    <>
+      <CreateRepository />
+      <Stack px="sm">
+        <Group bg="gray" p="md">
+          <Anchor
+            c="blue"
+            size="lg"
+            onClick={() => navigate(`/u/${userName}/repositories`)}
+          >
+            Repositories
+          </Anchor>
+        </Group>
+        <RepositoryPage repository={repository} />
+      </Stack>
+    </>
+  );
+}

@@ -1,6 +1,9 @@
 import { Modal, TextInput, Button, Group, Stack, Text } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
-import { createRepositorySchema, CreateRepositorySchemaValues } from "./schema";
+import {
+  createRepositorySchema,
+  CreateRepositorySchemaValues,
+} from "../schema";
 
 interface Props {
   opened: boolean;

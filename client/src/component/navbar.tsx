@@ -31,8 +31,8 @@ import {
   IconCoin,
   IconChevronDown,
 } from "@tabler/icons-react";
-import classes from "./Navbar.module.css";
-import { useAuth } from "../../auth";
+import classes from "./navbar.module.css";
+import { useAuth } from "../auth";
 
 const mockdata = [
   {
@@ -106,48 +106,49 @@ export default function Navbar() {
               LineageFlow
             </Text>
           </Group>
+          {isLoggedIn && (
+            <Group h="100%" gap={0} visibleFrom="sm">
+              <Link to={`/u/${userName}/repositories`} className={classes.link}>
+                Repositories
+              </Link>
+              <HoverCard
+                width={600}
+                position="bottom"
+                radius="md"
+                shadow="md"
+                withinPortal
+              >
+                <HoverCard.Target>
+                  <a href="#" className={classes.link}>
+                    <Center inline>
+                      <Box component="span" mr={5}>
+                        Feature Store
+                      </Box>
+                      <IconChevronDown
+                        style={{ width: rem(16), height: rem(16) }}
+                        color={theme.colors.blue[6]}
+                      />
+                    </Center>
+                  </a>
+                </HoverCard.Target>
 
-          <Group h="100%" gap={0} visibleFrom="sm">
-            <Link to="/" className={classes.link}>
-              Home
-            </Link>
-            <HoverCard
-              width={600}
-              position="bottom"
-              radius="md"
-              shadow="md"
-              withinPortal
-            >
-              <HoverCard.Target>
-                <a href="#" className={classes.link}>
-                  <Center inline>
-                    <Box component="span" mr={5}>
-                      Feature Store
-                    </Box>
-                    <IconChevronDown
-                      style={{ width: rem(16), height: rem(16) }}
-                      color={theme.colors.blue[6]}
-                    />
-                  </Center>
-                </a>
-              </HoverCard.Target>
+                <HoverCard.Dropdown style={{ overflow: "hidden" }}>
+                  <Group justify="space-between" px="md">
+                    <Text fw={500}>Features</Text>
+                    <Anchor href="#" fz="xs">
+                      View all
+                    </Anchor>
+                  </Group>
 
-              <HoverCard.Dropdown style={{ overflow: "hidden" }}>
-                <Group justify="space-between" px="md">
-                  <Text fw={500}>Features</Text>
-                  <Anchor href="#" fz="xs">
-                    View all
-                  </Anchor>
-                </Group>
+                  <Divider my="sm" />
 
-                <Divider my="sm" />
-
-                <SimpleGrid cols={2} spacing={0}>
-                  {links}
-                </SimpleGrid>
-              </HoverCard.Dropdown>
-            </HoverCard>
-          </Group>
+                  <SimpleGrid cols={2} spacing={0}>
+                    {links}
+                  </SimpleGrid>
+                </HoverCard.Dropdown>
+              </HoverCard>
+            </Group>
+          )}
 
           {!isLoggedIn ? (
             <Group visibleFrom="sm">
@@ -184,26 +185,28 @@ export default function Navbar() {
         zIndex={1000000}
       >
         <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
-          <Divider my="sm" />
+          {isLoggedIn && (
+            <>
+              <Divider my="sm" />
 
-          <Link to="/" className={classes.link}>
-            {" "}
-            Home
-          </Link>
-          <UnstyledButton className={classes.link} onClick={toggleLinks}>
-            <Center inline>
-              <Box component="span" mr={5}>
-                Features
-              </Box>
-              <IconChevronDown
-                style={{ width: rem(16), height: rem(16) }}
-                color={theme.colors.blue[6]}
-              />
-            </Center>
-          </UnstyledButton>
-          <Collapse in={linksOpened}>{links}</Collapse>
-          <Divider my="sm" />
-
+              <Link to={`/u/${userName}/repositories`} className={classes.link}>
+                Repositories
+              </Link>
+              <UnstyledButton className={classes.link} onClick={toggleLinks}>
+                <Center inline>
+                  <Box component="span" mr={5}>
+                    Features
+                  </Box>
+                  <IconChevronDown
+                    style={{ width: rem(16), height: rem(16) }}
+                    color={theme.colors.blue[6]}
+                  />
+                </Center>
+              </UnstyledButton>
+              <Collapse in={linksOpened}>{links}</Collapse>
+              <Divider my="sm" />
+            </>
+          )}
           {!isLoggedIn ? (
             <Group justify="center" grow pb="xl" px="md">
               <Button variant="default" onClick={() => navigate("/login")}>

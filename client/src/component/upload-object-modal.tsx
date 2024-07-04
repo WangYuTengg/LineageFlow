@@ -12,7 +12,7 @@ import { useForm, zodResolver } from "@mantine/form";
 import {
   uploadObjectModalSchema,
   UploadObjectModalSchemaValues,
-} from "./schema";
+} from "../schema";
 interface Props {
   repo: string;
   branch: string;
@@ -90,7 +90,7 @@ export default function UploadObjectModal({
           leftSectionPointerEvents="none"
           {...form.getInputProps("file")}
         />
-        <Button mt="md" type="submit">
+        <Button mt="md" type="submit" disabled={!form.isDirty()}>
           Upload
         </Button>
       </form>

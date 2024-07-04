@@ -1,14 +1,16 @@
+import "./index.css";
+import "@mantine/core/styles.css";
 import ReactDOM from "react-dom/client";
 import { StrictMode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { MantineProvider, DEFAULT_THEME, Stack } from "@mantine/core";
-import "./index.css";
-import "@mantine/core/styles.css";
-import App from "./App";
-import Navbar from "./component/Navbar";
-import LoginForm from "./component/Login";
-import SignUpForm from "./component/Signup";
 import { AuthProvider, ProtectedRoute } from "./auth";
+
+import Navbar from "./component/navbar";
+import LoginForm from "./component/login-form";
+import SignUpForm from "./component/signup-form";
+import Repositories from "./routes/repository-list";
+import Repository from "./routes/repository";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -20,15 +22,22 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route path="/signup" element={<SignUpForm />} />
-              {/* <Route
-                path="/"
+              <Route
+                path="/u/:username/repositories"
                 element={
                   <ProtectedRoute>
-                    <App />
+                    <Repositories />
                   </ProtectedRoute>
                 }
-              /> */}
-                <Route path="/" element={<App />} />
+              />
+              <Route
+                path="/u/:username/r/:repo_name"
+                element={
+                  <ProtectedRoute>
+                    <Repository />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Stack>
         </MantineProvider>
