@@ -50,7 +50,7 @@ class Commit(models.Model):
 
 class Repo(models.Model):
     repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    repo_name = models.CharField(max_length=100, unique=True)
+    repo_name = models.CharField(max_length=100)
     description = models.TextField(null=True)
     default_branch = models.CharField(max_length=100)
     bucket_url = models.URLField(null=True)

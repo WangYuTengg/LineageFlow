@@ -1,6 +1,6 @@
 from django.urls import path
 from .view import CreateRepositoryView
-from .view import RangeView, MetaView, CommitView, BranchView, LoginAdminView, createUserView
+from .view import RangeView, MetaView, CommitView, BranchView, LoginAdminView, CreateUserView
 from .views.onboard.view import OnboardingView
 
 urlpatterns = [
@@ -11,5 +11,5 @@ urlpatterns = [
     path("commit/",CommitView.as_view(), name="commit"),
     path("branch/",BranchView.as_view(), name="branch"),
     path("onboard/", OnboardingView.as_view(), name='onboard'),
-    path("signup/", createUserView.as_view(), name='sign-up'),
+    path("signup/", CreateUserView.as_view(), name='sign-up'),
 ]

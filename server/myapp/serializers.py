@@ -1,16 +1,26 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from .models import Item, Files, Range, MetaRange, Commit, Branch, Repo, Users
+from .models import (
+    Item, 
+    Files, 
+    Range, 
+    MetaRange, 
+    Commit, 
+    Branch, 
+    Repo, 
+    Users,
+    UserToRepo,
+    )
 from django.db import transaction, IntegrityError
 
 
-# class ItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Item
-#         fields = ["name", "description"]
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ["name", "description"]
 
-#     def create(self, validated_data):
-#         return Item.objects.create(**validated_data)
+    def create(self, validated_data):
+        return Item.objects.create(**validated_data)
 
 
 class FilesSerializer(serializers.ModelSerializer):
@@ -67,7 +77,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Branch
-        fields = ["branch_name", "created_timestamp", "updated_timestamp", "commit_id"]
+        fields = ["branch_name", "created_timestamp", "updated_timestamp", "commit_id", "repo_id"]
 
     def create(self, validated_data):
         branch_instance = Branch.objects.create(**validated_data)
@@ -91,14 +101,13 @@ class RepositorySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
-            branch_name = validated_data.pop("default_branch")
+            branch_name = validated_data.get("default_branch")
             with transaction.atomic():
                 meta_range = MetaRange.objects.create()
                 commit = Commit.objects.create(meta_id=meta_range)
+                repo = Repo.objects.create(**validated_data)
                 branch = Branch.objects.create(
-                    branch_name=branch_name, commit_id=commit
-                )
-                repo = Repo.objects.create(default_branch=branch, **validated_data)
+                    branch_name=branch_name, commit_id=commit, repo_id=repo)
 
             return repo
 
@@ -140,4 +149,12 @@ class UserSerializer(serializers.ModelSerializer):
                 {"unexpected_error": f"An unexpected error occurred: {str(e)}"}
             )
 
-
+class RoleSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = UserToRepo
+        fields = ["user_id", "repo_id", "role"]
+    
+    def create(self, validated_data):
+        role = UserToRepo.objects.create(validated_data)
+        return role

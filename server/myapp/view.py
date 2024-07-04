@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
     RepositorySerializer,
-    # ItemSerializer,
+    ItemSerializer,
     FilesSerializer,
     RangeSerializer,
     MetaRangeSerializer,
     CommitSerializer,
     BranchSerializer,
-    UserSerializer
+    UserSerializer,
+    RoleSerializer,
 )
 from .models import Item, Range, MetaRange, Commit, Branch, Users, UserToRepo, Repo
 
@@ -23,21 +24,29 @@ class HelloWorldView(APIView):
 class CreateRepositoryView(APIView):
     def post(self, request):
         '''request body needs username, repo name, default branch name 
-        optional: '''
+        optional: bucket_url, description'''
+        
         username = request.data.pop("username")
-        serializer = RepositorySerializer(data=request.data)
-        print(request.data)
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            user = Users.objects.get(username=username)
+        except Users.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        repo_instance = RepositorySerializer(data=request.data)
+        if repo_instance.is_valid():
+            repo_instance.save()
+            repo = Repo.objects.get(**repo_instance.validated_data)
+            user.repos.add(repo)
+            user_instance = UserSerializer(instance=user)
+            # TODO create the usertorepo
             response_data = {
-                "message": "Data Inserted Successfully",
-                "data": serializer.data,
+                "message": "Repo Created Successfully",
+                "data": repo_instance.data
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
-
         else:
-            print("Validation errors:", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print("Validation errors:", repo_instance.errors)
+        return Response(repo_instance.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # testing on the cloud db
@@ -146,7 +155,7 @@ class LoginAdminView(APIView):
                 "message": "Invalid credentials"}
         return Response(response_data, status=status.HTTP_200_OK)
     
-class createUserView(APIView):
+class CreateUserView(APIView):
     def post(self, request):
         user_instance = UserSerializer(data=request.data)
         if user_instance.is_valid():
