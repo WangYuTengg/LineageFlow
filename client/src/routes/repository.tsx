@@ -7,7 +7,7 @@ import { useAuth } from "../auth";
 
 export default function Repository() {
   const navigate = useNavigate();
-  const { userName } = useAuth();
+  const { userName, isLoggedIn } = useAuth();
   const { repo_name } = useParams();
   const location = useLocation();
   const { repo } = location.state;
@@ -19,9 +19,12 @@ export default function Repository() {
     default_branch: repo.default_branch,
     branches: repo.branches.map((branch: Branch) => branch.branch_name),
     created_at: repo.created_at,
-    storage_bucket_url: repo.storage_bucket_url
+    storage_bucket_url: repo.storage_bucket_url,
   });
 
+  if (!isLoggedIn) {
+    navigate("/login");
+  }
 
   return (
     <>
