@@ -1,19 +1,18 @@
+import React, { useState } from "react";
 import {
   Modal,
-  FileInput,
-  rem,
-  Text,
-  Group,
-  TextInput,
   Button,
+  Text,
+  Stack,
+  Group,
+  Divider,
+  FileInput,
+  TextInput,
+  rem,
 } from "@mantine/core";
-import { useState } from 'react';
 import { IconFileCv } from "@tabler/icons-react";
 import { useForm, zodResolver } from "@mantine/form";
-import {
-  uploadObjectModalSchema,
-  UploadObjectModalSchemaValues,
-} from "../schema";
+import { uploadObjectModalSchema } from "../schema";
 
 interface Props {
   repo: string;
@@ -30,7 +29,9 @@ export default function UploadObjectModal({
   opened,
   onClose,
 }: Props) {
-  const [file, setFile] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [folderName, setFolderName] = useState<string>("");
 
   const form = useForm({
     initialValues: {
@@ -40,77 +41,137 @@ export default function UploadObjectModal({
     validate: zodResolver(uploadObjectModalSchema),
   });
 
-  const handleUpload = async (values: UploadObjectModalSchemaValues) => {
-    console.log("handleUpload called with values:", values);
-    console.log("Files to upload:", file);
-
-    const formData = new FormData();
-    // file.forEach((file, index) => {
-    //   formData.append(`file_${index}`, file);
-    // });
-    formData.append("objectName", values.objectName);
-    formData.append("repo", repo);
-    formData.append("branch", branch);
-    formData.append("storage_bucket", storage_bucket);
-
-    const response = await fetch("/api/upload/", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (response.ok) {
-      alert("File uploaded successfully");
-      onClose();
-    } else {
-      console.error(response.statusText);
-      alert("File upload failed");
+  const handleDirectoryUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      setFiles(fileArray);
+      if (fileArray.length > 0) {
+        const commonPath = fileArray[0].webkitRelativePath.split("/")[0];
+        setFolderName(commonPath);
+      }
     }
   };
 
+  const handleUpload = async () => {
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      files!.forEach((file) => {
+        formData.append("files", file);
+        formData.append("relative_paths", file.webkitRelativePath);
+      });
+      formData.append("repo", repo);
+      formData.append("branch", branch);
+      formData.append("storage_bucket", storage_bucket);
+      const response = await fetch("/api/upload/", {
+        method: "POST",
+        body: formData,
+      });
+      console.log(response);
+      if (response.ok) {
+        alert("Files uploaded successfully");
+        onClose();
+      } else {
+        console.error(response.statusText);
+        alert("File upload failed");
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      alert("File upload failed");
+    }
+    setIsLoading(false);
+  };
+
   return (
-    <Modal
-      size="xl"
-      opened={opened}
-      onClose={onClose}
-      title={<Text size="lg">Upload a file</Text>}
-    >
-      <form
-        onSubmit={form.onSubmit(async (values) => {
-          console.log("Form submitted with values:", values); // Debugging line
-          await handleUpload(values);
-        })}
-      >
-        <Group wrap="nowrap">
-          <Text>
-            {repo}/{branch}/
+    <Modal opened={opened} onClose={onClose} title="Upload Data" size="lg">
+      <Stack>
+        <Text size="xl" fw={500}>
+          Upload a folder
+        </Text>
+        <input
+          type="file"
+          //@ts-expect-error fck ts
+          webkitdirectory="true"
+          mozdirectory="true"
+          directory="true"
+          multiple
+          onChange={handleDirectoryUpload}
+          style={{ display: "none" }}
+          id="directoryUpload"
+        />
+        <label htmlFor="directoryUpload">
+          <Button
+            component="span"
+            leftSection={
+              <IconFileCv style={{ width: 18, height: 18 }} stroke={1.5} />
+            }
+          >
+            Select Folder
+          </Button>
+        </label>
+        {folderName && (
+          <Text mt="md" size="lg">
+            Selected Folder: <b>{folderName}</b>
           </Text>
-          <TextInput
-            placeholder="Object Name"
-            {...form.getInputProps("objectName")}
-          />
+        )}
+        <Group justify="flex-end">
+          <Button
+            mt="md"
+            onClick={handleUpload}
+            disabled={!files.length}
+            loading={isLoading}
+          >
+            Upload
+          </Button>
         </Group>
 
-        <FileInput
-          mt="md"
-          leftSection={
-            <IconFileCv
-              style={{ width: rem(18), height: rem(18) }}
-              stroke={1.5}
+        <Divider />
+
+        <Text size="xl" fw={500}>
+          Upload a file
+        </Text>
+
+        <form
+          onSubmit={form.onSubmit(async (values) => {
+            console.log("Form submitted with values:", values);
+            //todo: handle single or multiple file uploads
+          })}
+        >
+          <Group wrap="nowrap">
+            <Text>
+              {repo}/{branch}/
+            </Text>
+            <TextInput
+              placeholder="Object Name"
+              {...form.getInputProps("objectName")}
             />
-          }
-          label="Attach your data"
-          placeholder="Your data"
-          multiple
-          value = {file}  
-          // @ts-ignore
-          onChange={setFile}
-          {...form.getInputProps("file")}
-          leftSectionPointerEvents="none"
-        />
-        <Button mt="md" type="submit" disabled={!form.isDirty()}>
-          Upload
-        </Button>
-      </form>
+          </Group>
+
+          <FileInput
+            mt="md"
+            leftSection={
+              <IconFileCv
+                style={{ width: rem(18), height: rem(18) }}
+                stroke={1.5}
+              />
+            }
+            label="Attach your file(s)"
+            placeholder="Select file"
+            multiple
+            {...form.getInputProps("file")}
+            leftSectionPointerEvents="none"
+          />
+          <Group justify="flex-end">
+            <Button mt="md" type="submit" disabled={!form.isDirty()}>
+              Upload file
+            </Button>
+          </Group>
+        </form>
+      </Stack>
     </Modal>
   );
 }

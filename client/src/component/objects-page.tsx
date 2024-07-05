@@ -12,28 +12,24 @@ import {
 } from "@mantine/core";
 import { IconRefresh, IconUpload } from "@tabler/icons-react";
 import { useState } from "react";
-import UploadObjectModal from "./upload-object-modal"
 import { Repository } from "../schema";
-import TestUploadObject from "./TestObjectUpload";
-
+import UploadObjectModal from "./upload-object-modal";
 interface Props {
   repository: Repository;
 }
 
 export default function ObjectsPage({ repository }: Props) {
-  // Ensure defaultBranch is always a string
-  const defaultBranch = repository.default_branch || (repository.branches.length > 0 ? repository.branches[0] : "");
+  const defaultBranch =
+    repository.default_branch ||
+    (repository.branches.length > 0 ? repository.branches[0] : "");
 
   const [uploadObject, setUploadObject] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<string>(defaultBranch);
 
-  // Transform branches array to the format required by the Select component
   const branchOptions = repository.branches.map((branch) => ({
     value: branch,
     label: branch,
   }));
-
-  console.log(repository)
 
   return (
     <Stack px="8%">
@@ -81,7 +77,7 @@ export default function ObjectsPage({ repository }: Props) {
         </Stack>
       </Card>
       {uploadObject && (
-        <TestUploadObject
+        <UploadObjectModal
           repo={repository.repo_name}
           branch={selectedBranch}
           storage_bucket={repository.storage_bucket_url}
