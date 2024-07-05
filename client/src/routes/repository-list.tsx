@@ -38,7 +38,7 @@ export default function Repositories() {
     async function fetchRepositories() {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/getAllRepo?username=${userName}`,
+          `/api/getAllRepo?username=${userName}`,
           {
             headers: {
               "Content-Type": "application/json",

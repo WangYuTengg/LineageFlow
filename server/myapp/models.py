@@ -30,7 +30,7 @@ class MetaRange(models.Model):
     ranges = models.ManyToManyField(Range, default=[])
 
     def __str__(self):
-        return self.meta_id
+        return self.meta_id, self.range
 
 
 class Commit(models.Model):
@@ -45,7 +45,7 @@ class Commit(models.Model):
         ordering = ["-timestamp"]
 
     def __str__(self):
-        return self.commit_id
+        return self.commit_id, self.meta_id
 
 
 class Repo(models.Model):
@@ -73,7 +73,7 @@ class Branch(models.Model):
         ordering = ["-created_timestamp"]
 
     def __str__(self):
-        return self.branch_id
+        return self.branch_id, self.commid_id
 
 
 class Users(models.Model):
