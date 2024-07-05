@@ -3,6 +3,7 @@ import json
 import re
 import requests
 import os
+
 from rest_framework.exceptions import ValidationError
 
 class GCS:
@@ -50,6 +51,12 @@ class GCS:
         }
 
         return metadata
+    
+    def upload_and_get_metadata(self, file, relative_path, storage_bucket):
+        public_url = self.upload_to_gcs(file, relative_path, storage_bucket)
+        metadata = self.get_file_metadata(storage_bucket, relative_path)
+        metadata_json = json.dumps(metadata)
+        return {"url": public_url, "meta_data": metadata_json}
     
     def create_bucket(self, bucket_name):
             # Convert the bucket name to lowercase and replace invalid characters
