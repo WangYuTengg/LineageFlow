@@ -1,5 +1,6 @@
 import { z } from "zod";
 export interface Repository {
+  repo_id?: string;
   repo_name: string;
   description?: string;
   bucket_url: string;
