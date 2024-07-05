@@ -10,6 +10,20 @@ export interface Repository {
   storage_bucket_url: string;
 }
 
+export interface MetaData {
+  name: string;
+  size: number;
+  content_type: string;
+  updated: string;
+  generation: number;
+  metageneration: number;
+}
+
+export interface FileResource {
+  meta_data: MetaData;
+  url: string;
+}
+
 export const createRepositorySchema = z.object({
   repo_name: z.string().min(1, "Enter a repository name"),
   description: z.string().optional(),

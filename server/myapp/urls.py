@@ -2,13 +2,15 @@ from django.urls import path
 from .view import CreateRepositoryView
 from .views.UploadObject.view import UploadObjectView
 from .view import (
-    RangeView, 
-    MetaView, 
-    CommitView, 
-    BranchView, 
-    LoginView, 
+    RangeView,
+    MetaView,
+    CommitView,
+    BranchView,
+    LoginView,
     CreateUserView,
-    GetRepoView)
+    GetObjectsView,
+    GetRepoView,
+)
 from .views.onboard.view import OnboardingView
 
 urlpatterns = [
@@ -21,5 +23,6 @@ urlpatterns = [
     path("onboard/", OnboardingView.as_view(), name="onboard"),
     path("signup/", CreateUserView.as_view(), name="sign-up"),
     path("getAllRepo/", GetRepoView.as_view(), name="get-repos"),
-    path("upload/", UploadObjectView.as_view(), name="upload")
+    path("getObjects/", GetObjectsView.as_view(), name="get-objects"),
+    path("upload/", UploadObjectView.as_view(), name="upload"),
 ]

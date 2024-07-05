@@ -11,10 +11,11 @@ export default function Repository() {
   const { userName } = useAuth();
 
   const repository: Repository = {
+    repo_id: repo.repo_id,
     repo_name: repo.repo_name,
     description: repo.description,
     bucket_url: "https://test-bucket.com",
-    default_branch: repo.default_branch,
+    default_branch: repo.default_branch || "main",
     branches: repo.branches.map((branch: Branch) => branch.branch_name),
     created_at: repo.created_at,
     storage_bucket_url: repo.storage_bucket_url,
