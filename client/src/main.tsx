@@ -11,6 +11,7 @@ import LoginForm from "./component/login-form";
 import SignUpForm from "./component/signup-form";
 import Repositories from "./routes/repository-list";
 import Repository from "./routes/repository";
+import TestUploadObject from "./component/TestObjectUpload";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -10,11 +10,12 @@ class GCS:
         self.client = storage.Client()
         
     def upload_to_gcs(self, file, object_name, bucket_link):
-        bucket = self.client.bucket(bucket_link)
+        bucket_name = self.get_bucket_name(bucket_link)
+        bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(object_name)
-        blob.upload_from_file(file)
+        blob.upload_from_file(file, content_type=file.content_type)
         return blob.public_url
-
+    
     def get_bucket_name(self, bucket_link):
         # Extract bucket name from URL
         match = re.match(r"https://storage.googleapis.com/([^/]+)/?", bucket_link)
@@ -23,9 +24,22 @@ class GCS:
         raise ValueError("Invalid bucket URL")
     
     def get_file_metadata(self, bucket_link, object_name):
-        bucket = self.client.bucket(self.get_bucket_name(bucket_link))
+        bucket_name = self.get_bucket_name(bucket_link)
+        bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(object_name)
         
+        # Ensure the blob exists and has metadata
+        blob.reload()
+        if blob.updated is None:
+            return {
+                "name": blob.name,
+                "size": blob.size,
+                "content_type": blob.content_type,
+                "updated": None,
+                "generation": blob.generation,
+                "metageneration": blob.metageneration
+            }
+
         metadata = {
             "name": blob.name,
             "size": blob.size,
@@ -34,7 +48,7 @@ class GCS:
             "generation": blob.generation,
             "metageneration": blob.metageneration
         }
-        
+
         return metadata
     
     def create_bucket(self, bucket_name):
@@ -59,7 +73,7 @@ class GCS:
 
             try:
                 new_bucket = self.client.create_bucket(bucket_name)
-                return new_bucket.name, f"https://storage.googleapis.com/{new_bucket.name}/"
+                return f"https://storage.googleapis.com/{new_bucket.name}/"
             except Exception as e:
                 raise ValidationError({"unexpected_error": f"An unexpected error occurred: {str(e)}"})
 

@@ -12,8 +12,9 @@ import {
 } from "@mantine/core";
 import { IconRefresh, IconUpload } from "@tabler/icons-react";
 import { useState } from "react";
-import UploadObjectModal from "./upload-object-modal";
+import UploadObjectModal from "./upload-object-modal"
 import { Repository } from "../schema";
+import TestUploadObject from "./TestObjectUpload";
 
 interface Props {
   repository: Repository;
@@ -80,7 +81,7 @@ export default function ObjectsPage({ repository }: Props) {
         </Stack>
       </Card>
       {uploadObject && (
-        <UploadObjectModal
+        <TestUploadObject
           repo={repository.repo_name}
           branch={selectedBranch}
           storage_bucket={repository.storage_bucket_url}
