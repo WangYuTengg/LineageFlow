@@ -14,7 +14,7 @@ import { Repository } from "../schema";
 const iconStyle = { width: rem(16), height: rem(16) };
 
 interface Props {
-  selectedRepository: Repository;
+  selectedRepository: Repository,
 }
 
 const tabsData = [

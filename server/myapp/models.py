@@ -73,7 +73,7 @@ class Branch(models.Model):
         ordering = ["-created_timestamp"]
 
     def __str__(self):
-        return self.branch_name
+        return self.branch_id
 
 
 class Users(models.Model):

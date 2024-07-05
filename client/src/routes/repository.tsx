@@ -19,6 +19,7 @@ export default function Repository() {
     default_branch: repo.default_branch,
     branches: repo.branches.map((branch: Branch) => branch.branch_name),
     created_at: repo.created_at,
+    storage_bucket_url: repo.storage_bucket_url
   });
 
 

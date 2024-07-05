@@ -6,7 +6,7 @@ export interface Repository {
   default_branch: string;
   branches: string[];
   created_at?: string;
-  storage_bucket_url?: string;
+  storage_bucket_url: string;
 }
 
 export const createRepositorySchema = z.object({

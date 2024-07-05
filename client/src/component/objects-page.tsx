@@ -20,10 +20,11 @@ interface Props {
 }
 
 export default function ObjectsPage({ repository }: Props) {
+  // Ensure defaultBranch is always a string
+  const defaultBranch = repository.default_branch || (repository.branches.length > 0 ? repository.branches[0] : "");
+
   const [uploadObject, setUploadObject] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(
-    repository.default_branch
-  );
+  const [selectedBranch, setSelectedBranch] = useState<string>(defaultBranch);
 
   // Transform branches array to the format required by the Select component
   const branchOptions = repository.branches.map((branch) => ({
@@ -31,13 +32,15 @@ export default function ObjectsPage({ repository }: Props) {
     label: branch,
   }));
 
+  console.log(repository)
+
   return (
     <Stack px="8%">
       <Group justify="space-between" mt="md">
         <Select
           data={branchOptions}
           value={selectedBranch}
-          onChange={(value) => setSelectedBranch(value)}
+          onChange={(value) => setSelectedBranch(value!)}
           size="sm"
         />
         <Group>
@@ -62,7 +65,7 @@ export default function ObjectsPage({ repository }: Props) {
           <Group px="lg">
             <b>lineage-flow:// </b>
             <Anchor>{repository.repo_name}</Anchor> /{" "}
-            <Anchor>{repository.default_branch}</Anchor>{" "}
+            <Anchor>{defaultBranch}</Anchor>{" "}
           </Group>
         </Card.Section>
         <Divider my="lg" />
@@ -79,7 +82,8 @@ export default function ObjectsPage({ repository }: Props) {
       {uploadObject && (
         <UploadObjectModal
           repo={repository.repo_name}
-          branch={selectedBranch || repository.default_branch}
+          branch={selectedBranch}
+          storage_bucket={repository.storage_bucket_url}
           opened={uploadObject}
           onClose={() => setUploadObject(false)}
         />

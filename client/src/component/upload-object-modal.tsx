@@ -7,15 +7,18 @@ import {
   TextInput,
   Button,
 } from "@mantine/core";
+import { useState } from 'react';
 import { IconFileCv } from "@tabler/icons-react";
 import { useForm, zodResolver } from "@mantine/form";
 import {
   uploadObjectModalSchema,
   UploadObjectModalSchemaValues,
 } from "../schema";
+
 interface Props {
   repo: string;
   branch: string;
+  storage_bucket: string;
   opened: boolean;
   onClose(): void;
 }
@@ -23,9 +26,12 @@ interface Props {
 export default function UploadObjectModal({
   repo,
   branch,
+  storage_bucket,
   opened,
   onClose,
 }: Props) {
+  const [file, setFile] = useState<File[]>([]);
+
   const form = useForm({
     initialValues: {
       objectName: "",
@@ -35,13 +41,19 @@ export default function UploadObjectModal({
   });
 
   const handleUpload = async (values: UploadObjectModalSchemaValues) => {
+    console.log("handleUpload called with values:", values);
+    console.log("Files to upload:", file);
+
     const formData = new FormData();
-    formData.append("file", values.file!);
+    // file.forEach((file, index) => {
+    //   formData.append(`file_${index}`, file);
+    // });
     formData.append("objectName", values.objectName);
     formData.append("repo", repo);
     formData.append("branch", branch);
+    formData.append("storage_bucket", storage_bucket);
 
-    const response = await fetch("/api/upload", {
+    const response = await fetch("/api/upload/", {
       method: "POST",
       body: formData,
     });
@@ -64,6 +76,7 @@ export default function UploadObjectModal({
     >
       <form
         onSubmit={form.onSubmit(async (values) => {
+          console.log("Form submitted with values:", values); // Debugging line
           await handleUpload(values);
         })}
       >
@@ -87,8 +100,12 @@ export default function UploadObjectModal({
           }
           label="Attach your data"
           placeholder="Your data"
-          leftSectionPointerEvents="none"
+          multiple
+          value = {file}  
+          // @ts-ignore
+          onChange={setFile}
           {...form.getInputProps("file")}
+          leftSectionPointerEvents="none"
         />
         <Button mt="md" type="submit" disabled={!form.isDirty()}>
           Upload
