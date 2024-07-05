@@ -31,7 +31,7 @@ class MetaRange(models.Model):
     ranges = models.ManyToManyField(Range, default=[])
 
     def __str__(self):
-        return self.meta_id, self.range
+        return self.meta_id, self.ranges
 
 
 class Commit(models.Model):
