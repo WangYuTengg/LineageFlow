@@ -17,6 +17,7 @@ class Files(models.Model):
     def __str__(self):
         return self.url
 
+
 class Range(models.Model):
     range_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     files = models.ManyToManyField(Files)
@@ -38,7 +39,9 @@ class Commit(models.Model):
     meta_id = models.OneToOneField(MetaRange, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     add = models.ManyToManyField(Files, default=[], related_name="add_set")
-    edit = models.ManyToManyField(Files, default=[], related_name="edit_set") #TODO how to differentiate different versions of files with same name
+    edit = models.ManyToManyField(
+        Files, default=[], related_name="edit_set"
+    )  # TODO how to differentiate different versions of files with same name
     remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
 
     class Meta:
@@ -57,7 +60,7 @@ class Repo(models.Model):
 
     def __str__(self):
         return self.repo_id, self.repo_name
-    
+
 
 class Branch(models.Model):
     branch_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -67,13 +70,15 @@ class Branch(models.Model):
     commit_id = models.ForeignKey(
         Commit, on_delete=models.CASCADE, related_name="commits"
     )
-    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo", null=False)
+    repo_id = models.ForeignKey(
+        Repo, on_delete=models.CASCADE, related_name="repo", null=False
+    )
 
     class Meta:
         ordering = ["-created_timestamp"]
 
     def __str__(self):
-        return self.branch_id, self.commid_id
+        return self.branch_id, self.commit_id
 
 
 class Users(models.Model):
@@ -85,13 +90,14 @@ class Users(models.Model):
 
     def __str__(self):
         return self.user_id
-    
+
 
 class UserToRepo(models.Model):
-    user_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name = "user")
-    repo_id = models.ForeignKey(Repo, on_delete=models.CASCADE, related_name="repo_user")
-    role = models.CharField(max_length=100, default="admin") #what other roles
+    user_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="user")
+    repo_id = models.ForeignKey(
+        Repo, on_delete=models.CASCADE, related_name="repo_user"
+    )
+    role = models.CharField(max_length=100, default="admin")  # what other roles
 
     def __str__(self):
         return self.role
-
