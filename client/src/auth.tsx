@@ -11,16 +11,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
+    !!localStorage.getItem("user")
+  );
+  const [userName, setUserName] = useState<string>(
+    localStorage.getItem("user") || ""
+  );
 
   const login = (name: string) => {
     setIsLoggedIn(true);
+    localStorage.setItem("user", name);
     setUserName(name);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
+    localStorage.setItem("user", "");
     setUserName("");
   };
 
