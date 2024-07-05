@@ -7,12 +7,14 @@ import {
 
 interface Props {
   opened: boolean;
+  loading: boolean;
   onClose(): void;
   onCreateRepository(values: CreateRepositorySchemaValues): void;
 }
 
 export default function CreateRepositoryModal({
   opened,
+  loading,
   onClose,
   onCreateRepository,
 }: Props) {
@@ -68,11 +70,23 @@ export default function CreateRepositoryModal({
             withAsterisk
             {...form.getInputProps("default_branch")}
           />
-          <Group>
-            <Button color="teal" variant="light" size="md" type="submit">
+          <Group justify="center">
+            <Button
+              color="teal"
+              variant="light"
+              size="md"
+              type="submit"
+              loading={loading}
+            >
               Create Repository
             </Button>
-            <Button variant="light" onClick={onClose} color="red" size="md">
+            <Button
+              variant="light"
+              onClick={onClose}
+              color="red"
+              size="md"
+              loading={loading}
+            >
               Cancel
             </Button>
           </Group>

@@ -57,6 +57,7 @@ const CreateRepository = ({ username, onCreate }: Props) => {
       </Group>
       {createRepository && (
         <CreateRepositoryModal
+          loading={isLoading}
           opened={createRepository}
           onClose={() => setCreateRepository(false)}
           onCreateRepository={(values) => handleCreateRepository(values)}
