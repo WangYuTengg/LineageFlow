@@ -10,6 +10,7 @@ from .view import (
     CreateUserView,
     GetObjectsView,
     GetRepoView,
+    FilesView,
 )
 from .views.onboard.view import OnboardingView
 
@@ -25,4 +26,5 @@ urlpatterns = [
     path("getAllRepo/", GetRepoView.as_view(), name="get-repos"),
     path("getObjects/", GetObjectsView.as_view(), name="get-objects"),
     path("upload/", UploadObjectView.as_view(), name="upload"),
+    path("getFiles/", FilesView.as_view(), name="files"),
 ]

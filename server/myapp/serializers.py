@@ -78,13 +78,10 @@ class BranchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Branch
-        fields = ["branch_name", "created_timestamp", "updated_timestamp", "commit_id", "repo_id"]
+        fields = ["branch_id", "branch_name", "created_timestamp", "updated_timestamp", "commit_id", "repo_id"]
 
     def create(self, validated_data):
-        #TODO NOT tested ! 
-        repo_id = validated_data.pop('repo_id')
-        commit_id = validated_data.pop('commit_id')
-        branch_instance = Branch.objects.create(repo_id=repo_id, commit_id=commit_id, **validated_data)
+        branch_instance = Branch.objects.create(**validated_data)
         return branch_instance
 
     def update(self, instance, validated_data):
