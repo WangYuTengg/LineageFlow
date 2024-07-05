@@ -4,17 +4,20 @@ import { IconPlus } from "@tabler/icons-react";
 import CreateRepositoryModal from "./create-repo-modal";
 import { CreateRepositorySchemaValues } from "../schema";
 
-interface CreateRepositoryProps {
+interface Props {
   username: string;
+  onCreate(): void;
 }
 
-const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
+const CreateRepository = ({ username, onCreate }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [createRepository, setCreateRepository] = useState(false);
 
   async function handleCreateRepository(values: CreateRepositorySchemaValues) {
+    setIsLoading(true);
     try {
       const payload = {
-        username, 
+        username,
         ...values,
       };
       const response = await fetch("/api/onboard/", {
@@ -24,12 +27,10 @@ const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      console.log(response);
-      const data = await response.json();
       if (response.ok) {
-        console.log(data);
         alert("Successfuly created repository!");
         setCreateRepository(false);
+        onCreate();
       } else {
         alert("Failed to create repository!");
       }
@@ -37,6 +38,7 @@ const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
       console.error(error);
       alert("Failed to create repository!");
     }
+    setIsLoading(false);
   }
 
   return (
@@ -47,6 +49,7 @@ const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
           leftSection={<IconPlus />}
           variant="light"
           color="teal"
+          loading={isLoading}
           onClick={() => setCreateRepository(true)}
         >
           Add Repository
@@ -61,6 +64,6 @@ const CreateRepository: React.FC<CreateRepositoryProps> = ({ username }) => {
       )}
     </>
   );
-}
+};
 
 export default CreateRepository;
