@@ -8,7 +8,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
@@ -31,40 +31,34 @@ interface Repository {
 export default function Repositories() {
   const navigate = useNavigate();
   const { userName } = useAuth();
-
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
-  useEffect(() => {
-    async function fetchRepositories() {
-      try {
-        const response = await fetch(
-          `/api/getAllRepo?username=${userName}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            method: "GET",
-          }
-        );
-        console.log(response);
-        const data = await response.json();
-        console.log(data);
-        if (response.ok) {
-          const formattedData = Object.keys(data).map((key) => ({
-            ...data[key].details,
-            branches: data[key].branches,
-          }));
-          setRepositories(formattedData);
-        } else {
-          console.error(data);
-        }
-      } catch (error) {
-        console.error(error);
+  const fetchRepositories = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/getAllRepo?username=${userName}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const formattedData = Object.keys(data).map((key) => ({
+          ...data[key].details,
+          branches: data[key].branches,
+        }));
+        setRepositories(formattedData);
+      } else {
+        console.error(data);
       }
+    } catch (error) {
+      console.error(error);
     }
-
-    fetchRepositories();
   }, [userName]);
+
+  useState(() => {
+    fetchRepositories();
+  });
 
   const RenderRepositories = repositories.map((repo) => {
     const handleClick = () => {
@@ -97,10 +91,12 @@ export default function Repositories() {
                 Branch Name: {branch.branch_name}
               </Text>
               <Text size="sm" c="dimmed">
-                Created at: {new Date(branch.created_timestamp).toLocaleString()}
+                Created at:{" "}
+                {new Date(branch.created_timestamp).toLocaleString()}
               </Text>
               <Text size="sm" c="dimmed">
-                Updated at: {new Date(branch.updated_timestamp).toLocaleString()}
+                Updated at:{" "}
+                {new Date(branch.updated_timestamp).toLocaleString()}
               </Text>
               <Text size="sm" c="dimmed">
                 Commit ID: {branch.commit_id}
@@ -116,7 +112,10 @@ export default function Repositories() {
     <Stack p="xl">
       <Group justify="space-between">
         <Title order={2}>Your repositories</Title>
-        <CreateRepository username={userName} />
+        <CreateRepository
+          username={userName}
+          onCreate={async () => fetchRepositories()}
+        />
       </Group>
       {repositories.length ? (
         RenderRepositories
