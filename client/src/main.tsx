@@ -5,13 +5,11 @@ import { StrictMode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { MantineProvider, DEFAULT_THEME, Stack } from "@mantine/core";
 import { AuthProvider, ProtectedRoute } from "./auth";
-
 import Navbar from "./component/navbar";
 import LoginForm from "./component/login-form";
 import SignUpForm from "./component/signup-form";
 import Repositories from "./routes/repository-list";
 import Repository from "./routes/repository";
-import TestUploadObject from "./component/TestObjectUpload";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -21,6 +19,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Stack p="xs">
             <Navbar />
             <Routes>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <></>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/login" element={<LoginForm />} />
               <Route path="/signup" element={<SignUpForm />} />
               <Route
