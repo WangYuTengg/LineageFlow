@@ -41,11 +41,13 @@ class UploadObjectView(APIView):
             object_metadata = []
             new_files = []
             edited_files = []
+
             with ThreadPoolExecutor() as executor:
                 futures = []
                 for file, relative_path in zip(files, relative_paths):
                     existing_file = File.objects.filter(url__startswith=relative_path).first()
                     if existing_file:
+                        edited_files.append(existing_file)
                         version = existing_file.version + 1
                     else:
                         version = 1
@@ -62,135 +64,112 @@ class UploadObjectView(APIView):
                         return Response({"error": f"File upload error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             with transaction.atomic():
-                # Check if there are existing commits for the branch
                 latest_commit = branch.commits.first()
                 new_metarange = MetaRange.objects.create()
+                print(f"New MetaRange created: {new_metarange.meta_id}")
 
                 if not latest_commit:
                     # No existing commits, create new MetaRange and Range objects
-
-                    # get list of ranges 
-                    # iterate through each key value pair and append it to range object
-                    # Group the objects metadata into ranges
-                    # Group the objects metadata into ranges
                     ranges = gcs.group_into_ranges(object_metadata)
                     
-                    print(ranges)
-
-                    # Iterate through each range (subset) and create Range objects
                     for range_subset in ranges: 
                         new_range = Range.objects.create()
                         
-                        # Iterate through each key-value pair in the range subset
                         for url, metadata in range_subset.items():
                             try:
-                                # Create a new File instance and associate it with the new Range
                                 new_file_instance = File.objects.create(
                                     url=url,
                                     meta_data=json.dumps(metadata),
-                                    range=new_range
+                                    range=new_range,
+                                    metarange=new_metarange
                                 )
+                                print(f"New File created: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
                                 new_files.append(new_file_instance)
                             except IntegrityError as e:
+                                print(f"Integrity error while saving new file: {e}")
                                 return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                             except DatabaseError as e:
+                                print(f"Database error while saving new file: {e}")
                                 return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                         
-                        # Add the new Range object to the MetaRange
                         new_metarange.ranges.add(new_range)
+                        print(f"New range added to MetaRange: {new_range.range_id}")
 
-                    # Save the MetaRange to persist changes
                     new_metarange.save()
 
-                    # Create new commit associated with the new MetaRange
                     new_commit = Commit.objects.create(
                         branch=branch,
-                        created_timestamp=timezone.now()
+                        created_timestamp=timezone.now(),
+                        meta_range=new_metarange
                     )
                     new_commit.add.set(new_files)
                     new_commit.save()
+                    print(f"New commit created: {new_commit.commit_id}")
                     
-                    new_metarange.commit = new_commit 
-                    new_metarange.save()
-
                 else:
-                    # Existing commits found, use the latest commit's MetaRange
-                    try: 
-                        metarange = latest_commit.meta_range
-                    except MetaRange.DoesNotExist:
-                        return Response({"error": "MetaRange not found"}, status=status.HTTP_404_NOT_FOUND)
-                    except DatabaseError as e:
-                        return Response({"error": f"Database error while fetching MetaRange: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                    new_range = Range.objects.create()
+                    metarange = latest_commit.meta_range
                     existing_ranges = list(metarange.ranges.all())
-                    updated_ranges = []
+                    updated_ranges = existing_ranges.copy()
                     processed_ranges = {}
 
-                    # Process files
                     for file_data in object_metadata:
                         files_serializer = FilesSerializer(data=file_data)
                         if files_serializer.is_valid():
                             try:
-                                existing_file = File.objects.filter(url=file_data['url']).first()
+                                existing_file = next((f for f in edited_files if f.url == file_data['url']), None)
                                 if existing_file:
-                                    # Handle edited file
                                     existing_file.version += 1
                                     existing_file.meta_data = file_data['meta_data']
+                                    existing_file.metarange = new_metarange
+                                    print(f"Before save - Updated File: {existing_file.url}, MetaRange: {existing_file.metarange.meta_id}")
                                     existing_file.save()
-                                    edited_files.append(existing_file)
+                                    print(f"After save - Updated File: {existing_file.url}, MetaRange: {existing_file.metarange.meta_id}")
 
                                     old_range = existing_file.range
                                     if old_range in processed_ranges:
-                                        # If the range has already been processed, get the new range from the processed_ranges dictionary
                                         new_range_excluding_edited = processed_ranges[old_range]
                                     else:
-                                        # Duplicate the range
                                         old_range_files = list(old_range.files.all())
-
-                                        # Remove edited file from the old range files
                                         old_range_files.remove(existing_file)
-
-                                        # Create a new range and add the files excluding the edited file
                                         new_range_excluding_edited = Range.objects.create()
                                         new_range_excluding_edited.files.set(old_range_files)
-
-                                        # Mark this range as processed
                                         processed_ranges[old_range] = new_range_excluding_edited
 
-                                    # Exclude the old range from meta_obj and add the new ranges
-                                    updated_ranges = [r for r in existing_ranges if r != old_range]
-
+                                    updated_ranges = [r for r in updated_ranges if r != old_range]
                                     updated_ranges.append(new_range_excluding_edited)
+                                    print(f"Range {old_range.range_id} processed and replaced with {new_range_excluding_edited.range_id}")
 
                                 else:
                                     new_file_instance = files_serializer.save()
                                     new_file_instance.range = new_range
+                                    new_file_instance.metarange = new_metarange
                                     new_file_instance.save()
+                                    print(f"New File created in existing commit: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
                                     new_files.append(new_file_instance)
                             except IntegrityError as e:
+                                print(f"Integrity error while saving file: {e}")
                                 return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                             except DatabaseError as e:
+                                print(f"Database error while saving file: {e}")
                                 return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                         else:
+                            print(f"Serializer errors: {files_serializer.errors}")
                             return Response(files_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-                    # Create new MetaRange with updated ranges
                     new_meta_obj = MetaRange.objects.create()
                     new_meta_obj.ranges.set(updated_ranges)
                     new_meta_obj.save()
+                    print(f"Updated MetaRange created: {new_meta_obj.meta_id}")
 
-                    # Create a new commit with the updated MetaRange
                     new_commit = Commit.objects.create(
                         branch=branch,
-                        created_timestamp=timezone.now()
+                        created_timestamp=timezone.now(),
+                        meta_range=new_meta_obj
                     )
                     new_commit.add.set(new_files)
                     new_commit.edit.set(edited_files)
                     new_commit.save()
-                    
-                    new_meta_obj.commit = new_commit 
-                    new_meta_obj.save()
+                    print(f"New Commit created: {new_commit.commit_id}")
 
             return Response({"commit_id": new_commit.commit_id}, status=status.HTTP_201_CREATED)
 

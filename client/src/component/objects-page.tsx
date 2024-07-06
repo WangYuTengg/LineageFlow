@@ -61,6 +61,8 @@ export default function ObjectsPage({
         }
       );
       const data: { files: FileResource[] } = await response.json();
+      console.log(data)
+      console.log(data.files)
       const files = data.files.flat(1).map((file) => ({
         ...file,
         meta_data: JSON.parse(file.meta_data as unknown as string),

@@ -3,9 +3,10 @@ import json
 import re
 import requests
 import os
-
 from rest_framework.exceptions import ValidationError
 from google.api_core.exceptions import GoogleAPICallError
+import urllib.parse
+
 
 class GCS:
     def __init__(self):
@@ -16,7 +17,21 @@ class GCS:
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(object_name)
         blob.upload_from_file(file, content_type=file.content_type)
-        return blob.public_url
+        public_url = blob.public_url
+        return self.ensure_consistent_url(public_url)
+
+    def ensure_consistent_url(self, url):
+        decoded_url = urllib.parse.unquote(url)
+        parsed_url = urllib.parse.urlsplit(decoded_url)
+        encoded_path = urllib.parse.quote(parsed_url.path)
+        return urllib.parse.urlunsplit((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            encoded_path,
+            parsed_url.query,
+            parsed_url.fragment
+        ))
+
     
     def get_bucket_name(self, bucket_link):
         # Extract bucket name from URL
@@ -66,7 +81,7 @@ class GCS:
 
         return metadata
     
-    def upload_and_get_metadata(self, file, relative_path, storage_bucket, version=0):
+    def upload_and_get_metadata(self, file, relative_path, storage_bucket, version=1):
         relative_path_with_version = f"{relative_path}?v={version}"
         public_url = self.upload_to_gcs(file, relative_path_with_version, storage_bucket)
         metadata = self.get_file_metadata(storage_bucket, relative_path_with_version)
