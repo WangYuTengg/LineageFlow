@@ -7,7 +7,10 @@ export interface Branch {
   latest_commit: string;
   repo_id: string;
 }
-
+export interface FolderContents {
+  files: FileResource[];
+  folders: { [key: string]: FolderContents };
+}
 export interface Repository {
   repo_id: string;
   repo_name: string;
