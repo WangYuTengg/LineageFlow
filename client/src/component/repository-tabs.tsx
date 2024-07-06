@@ -10,6 +10,7 @@ import RepositoryPage from "./objects-page";
 import { Repository, UncommittedChanges } from "../schema";
 import { useState } from "react";
 import UncommittedChangesPage from "./uncommited-changes";
+import BranchesPage from "./branches";
 
 const iconStyle = { width: rem(16), height: rem(16) };
 
@@ -67,7 +68,12 @@ export function RepositoryTabs({ selectedRepository }: Props) {
       </Tabs.Panel>
 
       <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
-      <Tabs.Panel value="branches">Branches tab content</Tabs.Panel>
+      <Tabs.Panel value="branches">
+        <BranchesPage
+          branches={selectedRepository.branches}
+          defaultBranch={selectedRepository.default_branch}
+        />
+      </Tabs.Panel>
       <Tabs.Panel value="settings">Settings tab content</Tabs.Panel>
     </Tabs>
   );
