@@ -14,10 +14,11 @@ import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
 
 interface Branch {
+  branch_id: string;
   branch_name: string;
   created_timestamp: string;
   updated_timestamp: string;
-  commit_id: string;
+  latest_commit: string;
   repo_id: string;
 }
 
@@ -43,11 +44,7 @@ export default function Repositories() {
       });
       const data = await response.json();
       if (response.ok) {
-        const formattedData = Object.keys(data).map((key) => ({
-          ...data[key].details,
-          branches: data[key].branches,
-        }));
-        setRepositories(formattedData);
+        setRepositories(data);
       } else {
         console.error(data);
       }
@@ -75,7 +72,7 @@ export default function Repositories() {
           {repo.repo_name}
         </Anchor>
         <Divider my="xs" />
-        <Box px="lg">
+        <Stack px="xl" gap="xs">
           <Text size="lg" fw={500}>
             Repository ID: {repo.repo_id}
           </Text>
@@ -98,12 +95,16 @@ export default function Repositories() {
                 Updated at:{" "}
                 {new Date(branch.updated_timestamp).toLocaleString()}
               </Text>
-              <Text size="sm" c="dimmed">
-                Commit ID: {branch.commit_id}
-              </Text>
+              {branch.latest_commit ? (
+                <Text size="sm" c="dimmed">
+                  Commit ID: {branch.latest_commit}
+                </Text>
+              ) : (
+                <Text c="dimmed">Commit: No commits yet</Text>
+              )}
             </Box>
           ))}
-        </Box>
+        </Stack>
       </Card>
     );
   });
