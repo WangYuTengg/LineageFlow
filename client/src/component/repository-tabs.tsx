@@ -66,14 +66,11 @@ export function RepositoryTabs({ selectedRepository }: Props) {
           onDone={() => setActiveTab("objects")}
         />
       </Tabs.Panel>
-
-      <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
       <Tabs.Panel value="branches">
-        <BranchesPage
-          branches={selectedRepository.branches}
-          defaultBranch={selectedRepository.default_branch}
-        />
+        <BranchesPage selectedRepository={selectedRepository} />
       </Tabs.Panel>
+      <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
+
       <Tabs.Panel value="settings">Settings tab content</Tabs.Panel>
     </Tabs>
   );

@@ -53,6 +53,11 @@ export const createRepositorySchema = z.object({
   default_branch: z.string().min(1, "Enter a default branch"),
 });
 
+export const createBranchSchema = z.object({
+  branchName: z.string().min(1, "Enter a branch name"),
+  parent: z.string().min(1, "Enter a parent branch"),
+});
+
 export const uploadObjectModalSchema = z.object({
   objectName: z.string().min(1, "Object name is required"),
   file: z.any().refine((file) => file instanceof File, {
@@ -72,6 +77,7 @@ export const signupSchema = z.object({
 });
 
 export type SignupSchemaValues = z.infer<typeof signupSchema>;
+export type LoginSchemaValues = z.infer<typeof loginSchema>;
 export type UploadObjectModalSchemaValues = z.infer<
   typeof uploadObjectModalSchema
 >;
