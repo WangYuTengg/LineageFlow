@@ -28,8 +28,7 @@ from .models import (
 
 class CreateRepositoryView(APIView):
     def post(self, request):
-        """request body needs username, repo name, default branch name
-        optional: bucket_url, description"""
+        #{"username": "admin", "repo_name": "ADMIN", "default_branch": "master"}
 
         username = request.data.pop("username")
         try:
@@ -109,6 +108,7 @@ class FilesView(APIView):
 
 class CommitView(APIView):
     def get(self, request):
+        branch = request.query_params.get("branch_id")
         commits = Commit.objects.all()
         serializer = CommitSerializer(commits, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -43,6 +43,7 @@ class Commit(models.Model):
         Files, default=[], related_name="edit_set"
     )  
     remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
+    branch = models.UUIDField(default="") #if root commit, branch is null then need to set after creating branch
 
     class Meta:
         ordering = ["-timestamp"]

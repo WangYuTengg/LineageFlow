@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class OnboardingView(APIView):
+    #{"username": "admin", "repo_name": "ADMIN", "default_branch": "master", "storage_bucket_name": "test"}
     def post(self, request):
         serializer = CreateRepositorySerializer(data=request.data)
         if serializer.is_valid():
             try:
                 repo = serializer.save()
                 logger.info(
-                    "Post request handled successfully. Data: %s",
+                    "Repo Created Successfully. Data: %s",
                     serializer.data,
                 )
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
