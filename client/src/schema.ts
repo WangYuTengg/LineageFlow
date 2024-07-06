@@ -1,13 +1,22 @@
 import { z } from "zod";
+export interface Branch {
+  branch_id: string;
+  branch_name: string;
+  created_timestamp: string;
+  updated_timestamp: string;
+  latest_commit: string;
+  repo_id: string;
+}
+
 export interface Repository {
-  repo_id?: string;
+  repo_id: string;
   repo_name: string;
-  description?: string;
-  bucket_url: string;
   default_branch: string;
-  branches: string[];
-  created_at?: string;
-  storage_bucket_url: string;
+  description: string;
+  branches: Branch[];
+  bucket_url: string;
+  created_timestamp: string;
+  updated_timestamp: string;
 }
 
 export interface MetaData {
