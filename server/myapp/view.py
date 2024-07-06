@@ -4,31 +4,24 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
     RepositorySerializer,
-    ItemSerializer,
     FilesSerializer,
     RangeSerializer,
-    MetaRangeSerializer,
     CommitSerializer,
     BranchSerializer,
     UserSerializer,
-    RoleSerializer,
 )
 from .models import (
-    Item,
-    Range,
     MetaRange,
     Commit,
     Branch,
     Users,
-    UserToRepo,
     Repo,
-    Files,
 )
 
 
 class CreateRepositoryView(APIView):
     def post(self, request):
-        #{"username": "admin", "repo_name": "ADMIN", "default_branch": "master"}
+        # {"username": "admin", "repo_name": "ADMIN", "default_branch": "master"}
 
         username = request.data.pop("username")
         try:
@@ -90,21 +83,21 @@ class CreateRepositoryView(APIView):
 #             return Response(response_data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class FilesView(APIView):
     def get(self, request):
-        branch_id=request.query_params.get("branch_id")
-        commit_obj=Branch.objects.get(branch_id=branch_id).commit_id
-        meta=Commit.objects.get(commit_id=commit_obj.commit_id).meta_id
-        ranges_obj=MetaRange.objects.get(meta_id=meta.meta_id).ranges
+        branch_id = request.query_params.get("branch_id")
+        commit_obj = Branch.objects.get(branch_id=branch_id).commit_id
+        meta = Commit.objects.get(commit_id=commit_obj.commit_id).meta_id
+        ranges_obj = MetaRange.objects.get(meta_id=meta.meta_id).ranges
         # DEBUG
         # print(RangeSerializer(instance=ranges_obj, many=True))
         # files=Range.objects.filter(range_id__in=ranges_obj.all())
         serializer = RangeSerializer(instance=ranges_obj, many=True)
-        if (not serializer.data):
+        if not serializer.data:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
-         
-            
+
 
 class CommitView(APIView):
     def get(self, request):
@@ -144,13 +137,15 @@ class BranchView(APIView):
         new_branch = Branch.objects.create(
             branch_name=request.data.get("branch_name"),
             commit_id=old_commit,
-            repo_id=repo_id)
+            repo_id=repo_id,
+        )
         serializer = BranchSerializer(instance=new_branch)
         response_data = {
             "message": "Branch Created Successfully",
             "data": serializer.data,
-        }   
+        }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
 
 class GetRepoView(APIView):
     def get(self, request):
@@ -161,14 +156,14 @@ class GetRepoView(APIView):
             return Response(
                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list('repo_id', flat=True)
         # print("User Repos:", repo_ids)
         repo_list = Users.objects.get(username=username).repos
         repos = Repo.objects.filter(pk__in=repo_list.all()).values()
         print(repos)
         # repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description, "storage_bucket_url": repo.bucket_url} for repo in repos]
-        
+
         response_data = {}
         for repo in repos:
             branches = Branch.objects.filter(repo_id=repo["repo_id"])
@@ -176,7 +171,7 @@ class GetRepoView(APIView):
             resp_data = {"details": repo}
             resp_data["branches"] = serializer.data
             response_data[repo["repo_name"]] = resp_data
-            
+
         return Response(response_data, status=status.HTTP_200_OK)
 
 
@@ -205,6 +200,7 @@ class CreateUserView(APIView):
             }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class GetObjectsView(APIView):
     def get(self, request):

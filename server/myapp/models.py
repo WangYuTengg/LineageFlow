@@ -10,96 +10,111 @@ class Item(models.Model):
         return self.name
 
 
-class Files(models.Model):
+# 1 File has 1 range:
+# file.range -> to get the range of the file
+class File(models.Model):
     url = models.URLField(primary_key=True)
     meta_data = models.TextField()
     version = models.IntegerField(default=1)
-    range = models.ForeignKey("Range", related_name="files", on_delete=models.CASCADE)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+    range = models.ForeignKey(
+        "Range",
+        related_name="files",
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
-    def str(self):
+    def __str__(self):
         return self.url
 
 
+#  range.metaranges.all() -> to get metaranges of a range
+# 1 Range -> Many files
+# range.files.all() -> to get all files associated with the range
 class Range(models.Model):
     range_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
 
-    def str(self):
+    def __str__(self):
         return str(self.range_id)
 
 
+# Many MetaRange -> Many Ranges (metarange.ranges.all() -> to get ranges of a metarange)
+# 1 meta range - 1 commit (so new commits, we MUST generate a new meta range)
+# To get commit of meta range, use meta_range.commit
 class MetaRange(models.Model):
     meta_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    ranges = models.ManyToManyField(Range, default=[])
+    ranges = models.ManyToManyField(Range, related_name="metaranges", default=[])
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+    commit = models.OneToOneField(
+        "Commit", related_name="meta_range", on_delete=models.CASCADE, null=True
+    )
 
     def __str__(self):
-        return self.meta_id, self.ranges
+        return str(self.meta_id)
 
 
+# 1 Branch -> Many Commits (For commit history, sort by TimeStamp)
+# branch.commits.all() -> Returns all commits associated with the branch
+# to get meta range of commit, use commit.meta_range (related_name in MetaRange)
 class Commit(models.Model):
     commit_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    meta_id = models.OneToOneField(MetaRange, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    add = models.ManyToManyField(Files, default=[], related_name="add_set")
-    edit = models.ManyToManyField(Files, default=[], related_name="edit_set")
-    remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
-    branch = models.UUIDField(
-        null=True
-    )  # if root commit, branch is null then need to set after creating branch
-
-    class Meta:
-        ordering = ["-timestamp"]
-
-    def __str__(self):
-        return self.commit_id, self.meta_id
-
-
-class Repo(models.Model):
-    repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    repo_name = models.CharField(max_length=100)
-    description = models.TextField(null=True)
-    default_branch = models.CharField(max_length=100)
-    bucket_url = models.URLField(null=True)
-
-    def __str__(self):
-        return self.repo_id, self.repo_name
-
-
-class Branch(models.Model):
-    branch_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    branch_name = models.CharField(max_length=100)
+    commit_message = models.TextField(null=True)
     created_timestamp = models.DateTimeField(auto_now_add=True)
-    updated_timestamp = models.DateTimeField(auto_now=True)
-    commit_id = models.ForeignKey(
-        Commit, on_delete=models.CASCADE, related_name="commits"
-    )
-    repo_id = models.ForeignKey(
-        Repo, on_delete=models.CASCADE, related_name="repo", null=False
+    add = models.ManyToManyField(File, default=[], related_name="add_set")
+    edit = models.ManyToManyField(File, default=[], related_name="edit_set")
+    remove = models.ManyToManyField(File, default=[], related_name="remove_set")
+    branch = models.ForeignKey(
+        "Branch", related_name="commits", on_delete=models.CASCADE
     )
 
     class Meta:
         ordering = ["-created_timestamp"]
 
     def __str__(self):
-        return self.branch_id, self.commit_id
+        return str(self.commit_id)
+
+
+# 1 Repo -> Many Branches
+# repo.branches.all() -> give us all the branches related to the repo
+class Branch(models.Model):
+    branch_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    branch_name = models.CharField(max_length=100)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+    updated_timestamp = models.DateTimeField(auto_now=True)
+    repo = models.ForeignKey(
+        "Repo", on_delete=models.CASCADE, related_name="branches", null=False
+    )
+
+    class Meta:
+        ordering = ["-created_timestamp"]
+
+    def __str__(self):
+        return str(self.branch_id)
+
+
+# user.repo_set.all() -> Returns all repos associated with the user
+# repo.users_set.all() -> Returns all users associated with the repo
+class Repo(models.Model):
+    repo_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    repo_name = models.CharField(max_length=100)
+    description = models.TextField(null=True)
+    default_branch = models.CharField(max_length=100)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+    updated_timestamp = models.DateTimeField(auto_now=True)
+    bucket_url = models.URLField(null=True)
+
+    def __str__(self):
+        return str(self.repo_id)
 
 
 class Users(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
-    repos = models.ManyToManyField(Repo, default=[])
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+    repos = models.ManyToManyField(Repo, default=[])  # many user <-> many repo
     email = models.EmailField()
 
     def __str__(self):
-        return self.user_id
-
-
-class UserToRepo(models.Model):
-    user_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="user")
-    repo_id = models.ForeignKey(
-        Repo, on_delete=models.CASCADE, related_name="repo_user"
-    )
-    role = models.CharField(max_length=100, default="admin")  # what other roles
-
-    def __str__(self):
-        return self.role
+        return str(self.user_id)

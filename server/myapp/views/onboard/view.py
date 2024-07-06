@@ -3,8 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from .serializer import CreateRepositorySerializer
-from myapp.serializers import FilesSerializer
-from myapp.models import Files
 import logging
 
 # Set up logging
@@ -12,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class OnboardingView(APIView):
-    #{"username": "admin", "repo_name": "ADMIN", "default_branch": "master", "storage_bucket_name": "test"}
+    # {"username": "admin", "repo_name": "ADMIN", "default_branch": "master", "storage_bucket_name": "test"}
     def post(self, request):
         serializer = CreateRepositorySerializer(data=request.data)
         if serializer.is_valid():
