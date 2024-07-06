@@ -47,6 +47,17 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
                 files_list = []
                 ranges_list = []
 
+                # Create the repository top-down: User -> repo -> branch -> commit -> metarange -> range -> file
+                user = Users.objects.get(username=username)
+                validated_data.pop("bucket_url", None)
+                validated_data.pop("storage_bucket_name", None)
+
+                repo = Repo.objects.create(
+                    **validated_data, bucket_url=storage_bucket_link
+                )
+                user.repos.add(repo)
+                branch = Branch.objects.create(branch_name=branch_name, repo=repo)
+
                 if objects:
                     for obj in objects:
                         key, value = next(iter(obj.items()))
@@ -58,21 +69,11 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
                         range_obj.files.set(rng)
                         ranges_list.append(range_obj)
 
-                meta_range = MetaRange.objects.create()
-                meta_range.ranges.set(ranges_list)
-
-                user = Users.objects.get(username=username)
-
-                commit = Commit.objects.create(meta_id=meta_range)
-
-                repo = Repo.objects.create(
-                    **validated_data, bucket_url=storage_bucket_link
-                )
-                user.repos.add(repo)
-
-                branch = Branch.objects.create(
-                    branch_name=branch_name, commit_id=commit, repo_id=repo
-                )
+                    commit = Commit.objects.create(
+                        branch=branch, commit_message="Initial onboard"
+                    )
+                    meta_range = MetaRange.objects.create(commit=commit)
+                    meta_range.ranges.set(ranges_list)
 
                 logger.info(
                     "Repository created successfully with repo_name: %s", repo.repo_name
@@ -93,34 +94,34 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
             )
 
 
-class RepositorySerializer(serializers.ModelSerializer):
-    default_branch = serializers.CharField(write_only=True)
+# class RepositorySerializer(serializers.ModelSerializer):
+#     default_branch = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = Repo
-        fields = ["repo_name", "description", "default_branch", "bucket_url"]
+#     class Meta:
+#         model = Repo
+#         fields = ["repo_name", "description", "default_branch", "bucket_url"]
 
-    def create(self, validated_data):
-        try:
-            branch_name = validated_data.get("default_branch")
-            with transaction.atomic():
-                meta_range = MetaRange.objects.create()
-                commit = Commit.objects.create(meta_id=meta_range)
-                repo = Repo.objects.create(**validated_data)
-                branch = Branch.objects.create(
-                    branch_name=branch_name, commit_id=commit, repo_id=repo
-                )
+#     def create(self, validated_data):
+#         try:
+#             branch_name = validated_data.get("default_branch")
+#             with transaction.atomic():
+#                 meta_range = MetaRange.objects.create()
+#                 commit = Commit.objects.create(meta_id=meta_range)
+#                 repo = Repo.objects.create(**validated_data)
+#                 branch = Branch.objects.create(
+#                     branch_name=branch_name, commit_id=commit, repo_id=repo
+#                 )
 
-            return repo
+#             return repo
 
-        except IntegrityError as e:
-            print(f"An integrity error occurred: {str(e)}")
-            raise ValidationError(
-                {"database_error": "A database integrity error occurred."}
-            )
+#         except IntegrityError as e:
+#             print(f"An integrity error occurred: {str(e)}")
+#             raise ValidationError(
+#                 {"database_error": "A database integrity error occurred."}
+#             )
 
-        except Exception as e:
-            print(f"An unexpected error occurred: {str(e)}")
-            raise ValidationError(
-                {"unexpected_error": f"An unexpected error occurred: {str(e)}"}
-            )
+#         except Exception as e:
+#             print(f"An unexpected error occurred: {str(e)}")
+#             raise ValidationError(
+#                 {"unexpected_error": f"An unexpected error occurred: {str(e)}"}
+#             )
