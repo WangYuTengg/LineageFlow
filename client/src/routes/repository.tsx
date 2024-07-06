@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { RepositoryTabs } from "../component/repository-tabs";
 import { type Repository } from "../schema";
 import { useAuth } from "../auth";
-import { useEffect } from "react";
 
 export default function Repository() {
   const navigate = useNavigate();
@@ -22,28 +21,6 @@ export default function Repository() {
     updated_timestamp: repo.updated_timestamp,
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/getCommitData?repo=${repository.repo_name}&branch=${repository.default_branch}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "GET",
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data); 
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-  
-    fetchData();
-  }, [repository.repo_name, repository.default_branch]); 
-  
   return (
     <>
       <Stack px="sm">

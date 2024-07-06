@@ -10,24 +10,14 @@ import {
   List,
   ActionIcon,
   Loader,
-  Text,
-  Collapse,
 } from "@mantine/core";
-import {
-  IconRefresh,
-  IconUpload,
-  IconFolder,
-  IconChevronDown,
-} from "@tabler/icons-react";
+import { IconRefresh, IconUpload } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { FileResource, Repository } from "../schema";
+import { FileResource, FolderContents, Repository } from "../schema";
 import UploadObjectModal from "./upload-object-modal";
+import RenderFileStructure from "./render-file-structure";
 interface Props {
   repository: Repository;
-}
-interface FolderContents {
-  files: FileResource[];
-  folders: { [key: string]: FolderContents };
 }
 
 function organizeFiles(fileResources: FileResource[]): FolderContents {
@@ -53,11 +43,13 @@ function organizeFiles(fileResources: FileResource[]): FolderContents {
 }
 export default function ObjectsPage({ repository }: Props) {
   const [state, setState] = useState({
+    refresh: false,
     isLoading: false,
     uploadObject: false,
     selectedBranch: repository.default_branch,
     fileResources: [] as FileResource[],
   });
+  const [filesToDelete, setFilesToDelete] = useState<FileResource[]>([]);
 
   function handleChangeState<K extends keyof typeof state>(
     key: K,
@@ -71,7 +63,8 @@ export default function ObjectsPage({ repository }: Props) {
       try {
         handleChangeState("isLoading", true);
         const response = await fetch(
-          `/api/getObjects?id=${repository.repo_id}&branch=${state.selectedBranch}`,
+          // getCommitData
+          `/api/getObjects/?id=${repository.repo_id}&branch=${state.selectedBranch}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -98,72 +91,11 @@ export default function ObjectsPage({ repository }: Props) {
 
     fetchFiles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [state.refresh]);
 
-  const branchOptions = repository.branches.map((branch) => branch.branch_name);
-
-  const RenderFileStructure = ({
-    folderContents,
-  }: {
-    folderContents: FolderContents;
-  }) => {
-    const [opened, setOpened] = useState({});
-
-    const handleToggle = (folderName: string) => {
-      setOpened((prev) => ({
-        ...prev,
-        [folderName]: !prev[folderName as keyof typeof opened],
-      }));
-    };
-
-    return (
-      <Stack>
-        {Object.keys(folderContents.folders).map((folderName) => (
-          <div key={folderName}>
-            <Group
-              gap="xs"
-              mb="xs"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleToggle(folderName)}
-              justify="space-between"
-            >
-              <Group>
-                <IconFolder size={20} />
-                <Text size="xl" fw="500">
-                  {folderName}
-                </Text>
-              </Group>
-              <IconChevronDown size={16} />
-            </Group>
-            <Collapse in={opened[folderName as keyof typeof opened] || false}>
-              <Stack pl="xl">
-                <RenderFileStructure
-                  folderContents={folderContents.folders[folderName]}
-                />
-              </Stack>
-            </Collapse>
-          </div>
-        ))}
-        <List>
-          {folderContents.files.map((file: FileResource) => (
-            <List.Item key={file.meta_data.name} mb="xs">
-              -{" "}
-              <Anchor
-                href={file.url}
-                key={file.meta_data.name}
-                target="_blank"
-                size="sm"
-                rel="noopener noreferrer"
-              >
-                {file.meta_data.name.split("/").pop()}
-              </Anchor>
-            </List.Item>
-          ))}
-        </List>
-      </Stack>
-    );
-  };
-
+  async function handleDeleteFiles() {
+    // Delete files logic
+  }
   const RenderCard = () => {
     if (state.fileResources.length === 0) {
       return (
@@ -201,7 +133,11 @@ export default function ObjectsPage({ repository }: Props) {
           </Card.Section>
           <Divider my="lg" />
           <Stack px="xl">
-            <RenderFileStructure folderContents={organizedFiles} />
+            <RenderFileStructure
+              folderContents={organizedFiles}
+              filesToDelete={filesToDelete}
+              setFilesToDelete={setFilesToDelete}
+            />
           </Stack>
         </Card>
       );
@@ -212,7 +148,7 @@ export default function ObjectsPage({ repository }: Props) {
     <Stack px="8%">
       <Group justify="space-between" mt="md">
         <Select
-          data={branchOptions}
+          data={repository.branches.map((branch) => branch.branch_name)}
           value={state.selectedBranch}
           onChange={(value) =>
             handleChangeState("selectedBranch", value as string)
@@ -223,7 +159,7 @@ export default function ObjectsPage({ repository }: Props) {
           <ActionIcon
             size="lg"
             variant="subtle"
-            onClick={() => console.log("refresh")}
+            onClick={() => handleChangeState("refresh", !state.refresh)}
           >
             <IconRefresh />
           </ActionIcon>
@@ -253,6 +189,14 @@ export default function ObjectsPage({ repository }: Props) {
           opened={state.uploadObject}
           onClose={() => handleChangeState("uploadObject", false)}
         />
+      )}
+      {filesToDelete.length > 0 && (
+        <Group justify="flex-end" onClick={handleDeleteFiles}>
+          <Button color="red">
+            Confirm Delete {filesToDelete.length} file
+            {filesToDelete.length > 1 && "s"}
+          </Button>{" "}
+        </Group>
       )}
     </Stack>
   );
