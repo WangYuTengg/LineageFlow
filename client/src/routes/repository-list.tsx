@@ -2,6 +2,7 @@ import {
   Anchor,
   Box,
   Card,
+  Code,
   Divider,
   Group,
   Stack,
@@ -27,6 +28,7 @@ interface Repository {
   repo_name: string;
   description: string;
   branches: Branch[];
+  bucket_url: string;
 }
 
 export default function Repositories() {
@@ -64,20 +66,28 @@ export default function Repositories() {
 
     return (
       <Card key={repo.repo_id} withBorder shadow="lg" padding="lg" radius="md">
-        <Anchor
-          size="xl"
-          onClick={handleClick}
-          className="text-blue-400 hover:underline text-2xl font-semibold"
-        >
-          {repo.repo_name}
-        </Anchor>
+        <Group justify="flex-start" align="center" gap="md">
+          <Anchor
+            fw={600}
+            size="xl"
+            onClick={handleClick}
+            className="text-blue-400 hover:underline text-2xl font-semibold"
+          >
+            {repo.repo_name}
+          </Anchor>
+          <Code px="md" py="2px" c="gray">
+            {repo.repo_id}
+          </Code>
+        </Group>
+
         <Divider my="xs" />
         <Stack px="xl" gap="xs">
-          <Text size="lg" fw={500}>
-            Repository ID: {repo.repo_id}
-          </Text>
+          <Text size="lg" fw={500}></Text>
           <Text size="lg" fw={500}>
             Description: {repo.description}
+          </Text>
+          <Text size="lg" fw={500}>
+            Bucket Name: {repo.bucket_url.split(".com/")[1].split("/")[0]}
           </Text>
           <Text size="lg" fw={500}>
             Branches:
