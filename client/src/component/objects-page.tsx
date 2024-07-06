@@ -55,10 +55,7 @@ export default function ObjectsPage({ repository }: Props) {
   const [state, setState] = useState({
     isLoading: false,
     uploadObject: false,
-    selectedBranch:
-      repository.default_branch ||
-      (repository.branches.length > 0 ? repository.branches[0] : "") ||
-      null,
+    selectedBranch: repository.default_branch,
     fileResources: [] as FileResource[],
   });
 
@@ -103,10 +100,7 @@ export default function ObjectsPage({ repository }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const branchOptions = repository.branches.map((branch) => ({
-    value: branch,
-    label: branch,
-  }));
+  const branchOptions = repository.branches.map((branch) => branch.branch_name);
 
   const RenderFileStructure = ({
     folderContents,
@@ -220,7 +214,9 @@ export default function ObjectsPage({ repository }: Props) {
         <Select
           data={branchOptions}
           value={state.selectedBranch}
-          onChange={(value) => handleChangeState("selectedBranch", value)}
+          onChange={(value) =>
+            handleChangeState("selectedBranch", value as string)
+          }
           size="sm"
         />
         <Group>
@@ -253,7 +249,7 @@ export default function ObjectsPage({ repository }: Props) {
         <UploadObjectModal
           repo={repository.repo_name}
           branch={state.selectedBranch as string}
-          storage_bucket={repository.storage_bucket_url}
+          storage_bucket={repository.bucket_url}
           opened={state.uploadObject}
           onClose={() => handleChangeState("uploadObject", false)}
         />

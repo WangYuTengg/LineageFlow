@@ -1,7 +1,7 @@
 import { Stack, Group, Anchor } from "@mantine/core";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RepositoryTabs } from "../component/repository-tabs";
-import { type Repository, type Branch } from "../schema";
+import { type Repository } from "../schema";
 import { useAuth } from "../auth";
 
 export default function Repository() {
@@ -15,7 +15,7 @@ export default function Repository() {
     repo_name: repo.repo_name,
     description: repo.description,
     default_branch: repo.default_branch,
-    branches: repo.branches.map((branch: Branch) => branch.branch_name),
+    branches: repo.branches,
     created_timestamp: repo.created_timestamp,
     bucket_url: repo.bucket_url,
     updated_timestamp: repo.updated_timestamp,
