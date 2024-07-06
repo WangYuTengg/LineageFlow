@@ -47,12 +47,12 @@ class CreateRepositorySerializer(serializers.ModelSerializer):
                         files_list.append(file)
                 if ranges:
                     for rng in ranges:
-                        range_obj = Range.objects.create(files=rng)
-                        # range_obj.files.set(rng)
+                        range_obj = Range.objects.create()
+                        range_obj.files.set(rng)
                         ranges_list.append(range_obj)
 
-                meta_range = MetaRange.objects.create(ranges=ranges_list)
-                # meta_range.ranges.set(ranges_list)
+                meta_range = MetaRange.objects.create()
+                meta_range.ranges.set(ranges_list)
                 
                 user = Users.objects.get(username = username)
 
