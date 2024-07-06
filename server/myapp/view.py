@@ -83,27 +83,38 @@ class BranchView(APIView):
 class GetRepoView(APIView):
     def get(self, request):
         username = request.query_params.get("username")
+        if not username:
+            return Response({"error": "Username not provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             user = Users.objects.get(username=username)
         except Users.DoesNotExist:
-            return Response(
-                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list('repo_id', flat=True)
-        # print("User Repos:", repo_ids)
-        repo_list = Users.objects.get(username=username).repos
-        repos = Repo.objects.filter(pk__in=repo_list.all()).values()
-        print(repos)
-        # repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description, "storage_bucket_url": repo.bucket_url} for repo in repos]
-
-        response_data = {}
+        repos = user.repos.all()
+        
+        response_data = []
         for repo in repos:
-            branches = Branch.objects.filter(repo_id=repo["repo_id"])
-            serializer = BranchSerializer(branches, many=True)
-            resp_data = {"details": repo}
-            resp_data["branches"] = serializer.data
-            response_data[repo["repo_name"]] = resp_data
+            repo_data = {
+                "repo_id": repo.repo_id,
+                "repo_name": repo.repo_name,
+                "description": repo.description,
+                "bucket_url": repo.bucket_url,
+                "branches": []
+            }
+            
+            branches = Branch.objects.filter(repo=repo)
+            for branch in branches:
+                branch_data = BranchSerializer(branch).data
+                latest_commit = branch.commits.order_by('-created_timestamp').first()
+                branch_data['latest_commit'] = {
+                    "commit_id": latest_commit.commit_id,
+                    "commit_message": latest_commit.commit_message,
+                    "created_timestamp": latest_commit.created_timestamp,
+                } if latest_commit else None
+                repo_data["branches"].append(branch_data)
+            
+            response_data.append(repo_data)
 
         return Response(response_data, status=status.HTTP_200_OK)
 

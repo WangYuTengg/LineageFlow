@@ -61,10 +61,7 @@ class CommitSerializer(serializers.ModelSerializer):
         commit_instance = Commit.objects.create(**validated_data)
         return commit_instance
 
-
 class BranchSerializer(serializers.ModelSerializer):
-    commit_id = serializers.PrimaryKeyRelatedField(queryset=Commit.objects.all())
-
     class Meta:
         model = Branch
         fields = [
@@ -72,7 +69,6 @@ class BranchSerializer(serializers.ModelSerializer):
             "branch_name",
             "created_timestamp",
             "updated_timestamp",
-            "commit_id",
             "repo_id",
         ]
 
@@ -81,9 +77,6 @@ class BranchSerializer(serializers.ModelSerializer):
         return branch_instance
 
     def update(self, instance, validated_data):
-        commit_data = validated_data.pop("commit_id")
-        commit_instance, created = Commit.objects.get_or_create(**commit_data)
-        instance.commit_id = commit_instance
         instance.branch_name = validated_data.get("branch_name", instance.branch_name)
         instance.save()
         return instance
