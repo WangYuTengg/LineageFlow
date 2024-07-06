@@ -13,17 +13,18 @@ class Item(models.Model):
 class Files(models.Model):
     url = models.URLField(primary_key=True)
     meta_data = models.TextField()
+    version = models.IntegerField(default=1)
+    range = models.ForeignKey("Range", related_name="files", on_delete=models.CASCADE)
 
-    def __str__(self):
+    def str(self):
         return self.url
 
 
 class Range(models.Model):
     range_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    files = models.ManyToManyField(Files)
 
-    def __str__(self):
-        return self.range_id
+    def str(self):
+        return str(self.range_id)
 
 
 class MetaRange(models.Model):
@@ -39,11 +40,11 @@ class Commit(models.Model):
     meta_id = models.OneToOneField(MetaRange, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     add = models.ManyToManyField(Files, default=[], related_name="add_set")
-    edit = models.ManyToManyField(
-        Files, default=[], related_name="edit_set"
-    )  
+    edit = models.ManyToManyField(Files, default=[], related_name="edit_set")
     remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
-    branch = models.UUIDField(default="") #if root commit, branch is null then need to set after creating branch
+    branch = models.UUIDField(
+        null=True
+    )  # if root commit, branch is null then need to set after creating branch
 
     class Meta:
         ordering = ["-timestamp"]
