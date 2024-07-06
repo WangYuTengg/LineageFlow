@@ -49,7 +49,7 @@ export default function RenderFileStructure({
   };
 
   const handleDownload = (url: string) => {
-    window.open(url, "_blank");
+    window.open(url.replace("?", "%3F").replace("=", "%3D"), "_blank");
   };
 
   return (
@@ -96,7 +96,7 @@ export default function RenderFileStructure({
               <Group>
                 <IconFile />
                 <Anchor
-                  href={file.url}
+                  href={file.url.replace("?", "%3F").replace("=", "%3D")}
                   key={file.meta_data.name}
                   target="_blank"
                   size="md"
