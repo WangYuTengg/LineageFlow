@@ -5,6 +5,7 @@ import requests
 import os
 
 from rest_framework.exceptions import ValidationError
+from google.api_core.exceptions import GoogleAPICallError
 
 class GCS:
     def __init__(self):
@@ -66,30 +67,41 @@ class GCS:
         return {"url": public_url, "meta_data": metadata_json}
     
     def create_bucket(self, bucket_name):
-            # Convert the bucket name to lowercase and replace invalid characters
-            bucket_name = bucket_name.lower().replace('_', '-')
+        # Convert the bucket name to lowercase and replace invalid characters
+        bucket_name = bucket_name.lower().replace('_', '-')
+        
+        # Remove any characters that are not allowed
+        bucket_name = re.sub(r'[^a-z0-9-.]', '', bucket_name)
+
+        # Ensure the bucket name is within the allowed length
+        bucket_name = bucket_name[:63]
+
+        # Ensure the bucket name starts and ends with a letter or number
+        if not re.match(r'^[a-z0-9]', bucket_name):
+            bucket_name = 'a' + bucket_name
+        if not re.match(r'[a-z0-9]$', bucket_name):
+            bucket_name = bucket_name + 'a'
+        
+        # Ensure the bucket name is at least 3 characters long
+        if len(bucket_name) < 3:
+            bucket_name += 'a' * (3 - len(bucket_name))
+
+        try:
+            new_bucket = self.client.create_bucket(bucket_name)
             
-            # Remove any characters that are not allowed
-            bucket_name = re.sub(r'[^a-z0-9-.]', '', bucket_name)
-
-            # Ensure the bucket name is within the allowed length
-            bucket_name = bucket_name[:63]
-
-            # Ensure the bucket name starts and ends with a letter or number
-            if not re.match(r'^[a-z0-9]', bucket_name):
-                bucket_name = 'a' + bucket_name
-            if not re.match(r'[a-z0-9]$', bucket_name):
-                bucket_name = bucket_name + 'a'
-            
-            # Ensure the bucket name is at least 3 characters long
-            if len(bucket_name) < 3:
-                bucket_name += 'a' * (3 - len(bucket_name))
-
-            try:
-                new_bucket = self.client.create_bucket(bucket_name)
-                return f"https://storage.googleapis.com/{new_bucket.name}/"
-            except Exception as e:
-                raise ValidationError({"unexpected_error": f"An unexpected error occurred: {str(e)}"})
+            # Make the bucket public
+            policy = new_bucket.get_iam_policy()
+            policy.bindings.append({
+                'role': 'roles/storage.objectViewer',
+                'members': {'allUsers'}
+            })
+            new_bucket.set_iam_policy(policy)
+            return f"https://storage.googleapis.com/{new_bucket.name}/"
+        
+        except GoogleAPICallError as e:
+            raise ValidationError({"google_api_error": f"A Google API error occurred: {str(e)}"})
+        except Exception as e:
+            raise ValidationError({"unexpected_error": f"An unexpected error occurred: {str(e)}"})
 
     def list_gcs_objects_from_prefix(self, bucket_link, prefix=None):
         bucket_name = self.get_bucket_name(bucket_link)
