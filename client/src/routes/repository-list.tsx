@@ -13,23 +13,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
-
-interface Branch {
-  branch_id: string;
-  branch_name: string;
-  created_timestamp: string;
-  updated_timestamp: string;
-  latest_commit: string;
-  repo_id: string;
-}
-
-interface Repository {
-  repo_id: string;
-  repo_name: string;
-  description: string;
-  branches: Branch[];
-  bucket_url: string;
-}
+import { Repository } from "../schema";
 
 export default function Repositories() {
   const navigate = useNavigate();
@@ -107,7 +91,7 @@ export default function Repositories() {
               </Text>
               {branch.latest_commit ? (
                 <Text size="sm" c="dimmed">
-                  Commit ID: {branch.latest_commit}
+                  Commit ID: {JSON.stringify(branch.latest_commit)}
                 </Text>
               ) : (
                 <Text c="dimmed">Commit: No commits yet</Text>
