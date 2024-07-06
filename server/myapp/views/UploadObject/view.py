@@ -4,7 +4,7 @@ from rest_framework import status
 from django.utils import timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from myapp.models import Branch, Repo, Range, Commit, MetaRange, File
-from myapp.serializers import CommitSerializer, FilesSerializer, RangeSerializer, MetaRangeSerializer
+from myapp.serializers import FilesSerializer
 from myapp.gcs_utils import GCS
 from django.db import transaction, IntegrityError, DatabaseError
 from rest_framework.exceptions import ValidationError
@@ -59,7 +59,7 @@ class UploadObjectView(APIView):
             with transaction.atomic():
                 # Check if there are existing commits for the branch
                 latest_commit = branch.commits.first()
-                
+
                 if not latest_commit:
                     # No existing commits, create new MetaRange and Range objects
                     new_metarange = MetaRange.objects.create()
@@ -67,12 +67,33 @@ class UploadObjectView(APIView):
                     new_metarange.ranges.add(new_range)
                     new_metarange.save()
 
+                    # Process files and associate them with the new range
+                    for file_data in object_metadata:
+                        files_serializer = FilesSerializer(data=file_data)
+                        if files_serializer.is_valid():
+                            try:
+                                new_file_instance = files_serializer.save()
+                                new_file_instance.range = new_range
+                                new_file_instance.save()
+                                new_files.append(new_file_instance)
+                            except IntegrityError as e:
+                                return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            except DatabaseError as e:
+                                return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        else:
+                            return Response(files_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
                     # Create new commit associated with the new MetaRange
                     new_commit = Commit.objects.create(
-                        meta_range=new_metarange,
                         branch=branch,
                         created_timestamp=timezone.now()
                     )
+                    new_commit.add.set(new_files)
+                    new_commit.save()
+                    
+                    new_metarange.commit = new_commit 
+                    new_metarange.save()
+
                 else:
                     # Existing commits found, use the latest commit's MetaRange
                     metarange = latest_commit.meta_range
@@ -140,13 +161,15 @@ class UploadObjectView(APIView):
 
                     # Create a new commit with the updated MetaRange
                     new_commit = Commit.objects.create(
-                        meta_range=new_meta_obj,
                         branch=branch,
                         created_timestamp=timezone.now()
                     )
                     new_commit.add.set(new_files)
                     new_commit.edit.set(edited_files)
                     new_commit.save()
+                    
+                    new_meta_obj.commit = new_commit 
+                    new_meta_obj.save()
 
             return Response({"commit_id": new_commit.commit_id}, status=status.HTTP_201_CREATED)
 
