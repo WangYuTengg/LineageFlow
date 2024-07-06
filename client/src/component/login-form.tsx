@@ -20,7 +20,7 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={form.onSubmit(async (values) => {
-        const response = await fetch("/api/loginAdmin/", {
+        const response = await fetch("/api/login/", {
           method: "POST",
           body: JSON.stringify(values),
           headers: {
