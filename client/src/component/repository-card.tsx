@@ -49,8 +49,6 @@ export default function RepositoryCard({
   filesToDelete,
   setFilesToDelete,
 }: Props) {
-  console.log(fileResources);
-  console.log(repository);
   if (fileResources.length === 0) {
     return (
       <Card shadow="lg" radius="sm" withBorder mt="md" p="xl">

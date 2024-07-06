@@ -4,8 +4,6 @@ import {
   IconCancel,
   IconGitCommit,
   IconGitBranch,
-  IconGitCompare,
-  IconCircleCaretRight,
   IconSettings,
 } from "@tabler/icons-react";
 import RepositoryPage from "./objects-page";
@@ -28,8 +26,6 @@ const tabsData = [
   },
   { value: "commits", iconComponent: IconGitCommit, label: "Commits" },
   { value: "branches", iconComponent: IconGitBranch, label: "Branches" },
-  { value: "compare", iconComponent: IconGitCompare, label: "Compare" },
-  { value: "actions", iconComponent: IconCircleCaretRight, label: "Actions" },
   { value: "settings", iconComponent: IconSettings, label: "Settings" },
 ];
 
@@ -72,8 +68,6 @@ export function RepositoryTabs({ selectedRepository }: Props) {
 
       <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
       <Tabs.Panel value="branches">Branches tab content</Tabs.Panel>
-      <Tabs.Panel value="compare">Compare tab content</Tabs.Panel>
-      <Tabs.Panel value="actions">Actions tab content</Tabs.Panel>
       <Tabs.Panel value="settings">Settings tab content</Tabs.Panel>
     </Tabs>
   );
