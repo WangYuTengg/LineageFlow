@@ -31,6 +31,12 @@ class GCS:
             return response.content 
         else:
             response.raise_for_status()
+            
+    def delete_file(self, bucket_name, file_url):
+        bucket = self.client.bucket(bucket_name)
+        blob_name = file_url.split('/')[-1]
+        blob = bucket.blob(blob_name)
+        blob.delete()
     
     def get_file_metadata(self, bucket_link, object_name):
         bucket_name = self.get_bucket_name(bucket_link)
@@ -60,12 +66,13 @@ class GCS:
 
         return metadata
     
-    def upload_and_get_metadata(self, file, relative_path, storage_bucket):
-        public_url = self.upload_to_gcs(file, relative_path, storage_bucket)
-        metadata = self.get_file_metadata(storage_bucket, relative_path)
+    def upload_and_get_metadata(self, file, relative_path, storage_bucket, version=0):
+        relative_path_with_version = f"{relative_path}?v={version}"
+        public_url = self.upload_to_gcs(file, relative_path_with_version, storage_bucket)
+        metadata = self.get_file_metadata(storage_bucket, relative_path_with_version)
         metadata_json = json.dumps(metadata)
         return {"url": public_url, "meta_data": metadata_json}
-    
+
     def create_bucket(self, bucket_name):
         # Convert the bucket name to lowercase and replace invalid characters
         bucket_name = bucket_name.lower().replace('_', '-')
@@ -136,7 +143,8 @@ class GCS:
 
         for metadata_dict in objects_metadata:
             # Extract the key (URL) and metadata
-            url, metadata = next(iter(metadata_dict.items()))
+            url = metadata_dict['url']
+            metadata = metadata_dict['meta_data']
 
             try:
                 metadata_str = json.dumps(metadata)
@@ -145,10 +153,10 @@ class GCS:
                 print(f"Error serializing metadata: {metadata} -> {e}")
                 continue
 
-            if current_size + metadata_size > max_size:
-                ranges.append(current_range)
-                current_range = {}
-                current_size = 0
+                if current_size + metadata_size > max_size:
+                    ranges.append(current_range)
+                    current_range = {}
+                    current_size = 0
 
             current_range[url] = metadata
             current_size += metadata_size
@@ -157,10 +165,6 @@ class GCS:
             ranges.append(current_range)
 
         return ranges
-    
-    def bucket_exists(self, bucket_name):
-        bucket = self.client.bucket(bucket_name)
-        return bucket.exists()
 
 def send_metadata_to_api(bucket_url, metadata):
     url = "http://your-api-endpoint.com/your-endpoint"

@@ -13,7 +13,8 @@ class Item(models.Model):
 # 1 File has 1 range:
 # file.range -> to get the range of the file
 class File(models.Model):
-    url = models.URLField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
+    url = models.URLField()
     meta_data = models.TextField()
     version = models.IntegerField(default=1)
     created_timestamp = models.DateTimeField(auto_now_add=True)
@@ -23,6 +24,10 @@ class File(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
+    metarange = models.ForeignKey("MetaRange", on_delete=models.CASCADE, related_name="files")
+
+    class Meta:
+        unique_together = ('url', 'metarange')
 
     def __str__(self):
         return self.url
