@@ -14,7 +14,12 @@ class GetObjectsView(APIView):
         branch = Branch.objects.get(repo_id=repo_id, branch_name=branch_name)
 
         commits = Commit.objects.filter(branch=branch)
+        # Initial commit might not exist
+        if not commits.exists():
+            return Response({"files": []}, status=status.HTTP_200_OK)
+
         latest_commit = commits.first()  # return latest commit
+        print("latest_commit:", latest_commit)
         meta_range = MetaRange.objects.get(commit=latest_commit)
         ranges = meta_range.ranges.all()
         kvs = []
