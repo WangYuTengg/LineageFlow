@@ -1,4 +1,14 @@
 import { z } from "zod";
+
+export interface UncommittedChanges {
+  repo: string;
+  branch: string;
+  storage_bucket: string;
+  changes: {
+    file: File;
+    type: string;
+  }[];
+}
 export interface Branch {
   branch_id: string;
   branch_name: string;

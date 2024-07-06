@@ -9,12 +9,14 @@ import {
   IconSettings,
 } from "@tabler/icons-react";
 import RepositoryPage from "./objects-page";
-import { Repository } from "../schema";
+import { Repository, UncommittedChanges } from "../schema";
+import { useState } from "react";
+import UncommittedChangesPage from "./uncommited-changes";
 
 const iconStyle = { width: rem(16), height: rem(16) };
 
 interface Props {
-  selectedRepository: Repository,
+  selectedRepository: Repository;
 }
 
 const tabsData = [
@@ -32,8 +34,12 @@ const tabsData = [
 ];
 
 export function RepositoryTabs({ selectedRepository }: Props) {
+  const [activeTab, setActiveTab] = useState<string | null>("objects");
+  const [uncommittedChanges, setUncommittedChanges] =
+    useState<UncommittedChanges | null>(null);
+
   return (
-    <Tabs defaultValue="objects" variant="outline">
+    <Tabs value={activeTab} onChange={setActiveTab} variant="outline">
       <Tabs.List>
         {tabsData.map((tab) => (
           <Tabs.Tab
@@ -47,21 +53,27 @@ export function RepositoryTabs({ selectedRepository }: Props) {
       </Tabs.List>
 
       <Tabs.Panel value="objects">
-        <RepositoryPage repository={selectedRepository} />
+        <RepositoryPage
+          repository={selectedRepository}
+          onUncommittedChanges={(data) => {
+            setActiveTab("uncommittedChanges");
+            setUncommittedChanges(data);
+          }}
+        />
       </Tabs.Panel>
 
       <Tabs.Panel value="uncommittedChanges">
-        Uncommitted Changes tab content
+        <UncommittedChangesPage
+          uncommittedChanges={uncommittedChanges}
+          repository={selectedRepository}
+          onDone={() => setActiveTab("objects")}
+        />
       </Tabs.Panel>
 
       <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
-
       <Tabs.Panel value="branches">Branches tab content</Tabs.Panel>
-
       <Tabs.Panel value="compare">Compare tab content</Tabs.Panel>
-
       <Tabs.Panel value="actions">Actions tab content</Tabs.Panel>
-
       <Tabs.Panel value="settings">Settings tab content</Tabs.Panel>
     </Tabs>
   );

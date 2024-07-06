@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { IconFileCv } from "@tabler/icons-react";
 import { useForm, zodResolver } from "@mantine/form";
-import { uploadObjectModalSchema } from "../schema";
+import { UncommittedChanges, uploadObjectModalSchema } from "../schema";
 
 interface Props {
   repo: string;
@@ -20,6 +20,7 @@ interface Props {
   storage_bucket: string;
   opened: boolean;
   onClose(): void;
+  onUpload(data: UncommittedChanges): void;
 }
 
 export default function UploadObjectModal({
@@ -28,9 +29,9 @@ export default function UploadObjectModal({
   storage_bucket,
   opened,
   onClose,
+  onUpload,
 }: Props) {
   const [files, setFiles] = useState<File[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [folderName, setFolderName] = useState<string>("");
 
   const form = useForm({
@@ -53,37 +54,6 @@ export default function UploadObjectModal({
         setFolderName(commonPath);
       }
     }
-  };
-
-  const handleUpload = async () => {
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      files!.forEach((file) => {
-        formData.append("files", file);
-        formData.append("relative_paths", file.webkitRelativePath);
-      });
-      formData.append("repo", repo);
-      formData.append("branch", branch);
-      formData.append("storage_bucket", storage_bucket);
-      const response = await fetch("/api/upload/", {
-        method: "POST",
-        body: formData,
-      });
-      console.log(response);
-      if (response.ok) {
-        alert("Files uploaded successfully");
-        onClose();
-      } else {
-        console.error(response.statusText);
-        alert("File upload failed");
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error(error);
-      alert("File upload failed");
-    }
-    setIsLoading(false);
   };
 
   return (
@@ -121,9 +91,19 @@ export default function UploadObjectModal({
         <Group justify="flex-end">
           <Button
             mt="md"
-            onClick={handleUpload}
+            onClick={() => {
+              onUpload({
+                repo,
+                branch,
+                storage_bucket,
+                changes: files.map((file) => ({
+                  file,
+                  type: "Add",
+                })),
+              });
+              onClose();
+            }}
             disabled={!files.length}
-            loading={isLoading}
           >
             Upload
           </Button>

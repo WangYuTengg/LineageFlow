@@ -5,43 +5,30 @@ import {
   Card,
   Anchor,
   Stack,
-  Title,
-  Divider,
-  List,
+  Notification,
   ActionIcon,
   Loader,
+  Text,
 } from "@mantine/core";
-import { IconRefresh, IconUpload } from "@tabler/icons-react";
+import {
+  IconRefresh,
+  IconUpload,
+  IconExclamationMark,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { FileResource, FolderContents, Repository } from "../schema";
+import { FileResource, Repository, UncommittedChanges } from "../schema";
 import UploadObjectModal from "./upload-object-modal";
-import RenderFileStructure from "./render-file-structure";
+import RepositoryCard from "./repository-card";
+
 interface Props {
   repository: Repository;
+  onUncommittedChanges: (data: UncommittedChanges) => void;
 }
 
-function organizeFiles(fileResources: FileResource[]): FolderContents {
-  const root: FolderContents = { files: [], folders: {} };
-
-  fileResources.forEach((file) => {
-    const parts = file.meta_data.name.split("/");
-    let currentFolder = root;
-
-    parts.forEach((part, index) => {
-      if (index === parts.length - 1) {
-        currentFolder.files.push(file);
-      } else {
-        if (!currentFolder.folders[part]) {
-          currentFolder.folders[part] = { files: [], folders: {} };
-        }
-        currentFolder = currentFolder.folders[part];
-      }
-    });
-  });
-
-  return root;
-}
-export default function ObjectsPage({ repository }: Props) {
+export default function ObjectsPage({
+  repository,
+  onUncommittedChanges,
+}: Props) {
   const [state, setState] = useState({
     refresh: false,
     isLoading: false,
@@ -50,6 +37,8 @@ export default function ObjectsPage({ repository }: Props) {
     fileResources: [] as FileResource[],
   });
   const [filesToDelete, setFilesToDelete] = useState<FileResource[]>([]);
+  const [uncommittedChanges, setUncommittedChanges] =
+    useState<UncommittedChanges | null>(null);
 
   function handleChangeState<K extends keyof typeof state>(
     key: K,
@@ -60,33 +49,28 @@ export default function ObjectsPage({ repository }: Props) {
 
   useEffect(() => {
     async function fetchFiles() {
-      try {
-        handleChangeState("isLoading", true);
-        const response = await fetch(
-          // getCommitData
-          `/api/getObjects/?id=${repository.repo_id}&branch=${state.selectedBranch}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            method: "GET",
-          }
-        );
-        const data: { files: FileResource[] } = await response.json();
-        const files = data.files.flat(1).map((file) => ({
-          ...file,
-          meta_data: JSON.parse(file.meta_data as unknown as string),
-        }));
-        if (response.ok) {
-          handleChangeState("fileResources", files);
-        } else {
-          alert("Internal server error");
+      handleChangeState("isLoading", true);
+      const response = await fetch(
+        // `/api/getCommitData/?repo=${repository.repo_name}&branch=${state.selectedBranch}`,
+        `/api/getObjects/?id=${repository.repo_id}&branch=${state.selectedBranch}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
         }
-        handleChangeState("isLoading", false);
-      } catch (error) {
-        console.error(error);
-        alert("Error fetching objects!");
+      );
+      const data: { files: FileResource[] } = await response.json();
+      const files = data.files.flat(1).map((file) => ({
+        ...file,
+        meta_data: JSON.parse(file.meta_data as unknown as string),
+      }));
+      if (response.ok) {
+        handleChangeState("fileResources", files);
+      } else {
+        alert("Internal server error");
       }
+      handleChangeState("isLoading", false);
     }
 
     fetchFiles();
@@ -96,56 +80,25 @@ export default function ObjectsPage({ repository }: Props) {
   async function handleDeleteFiles() {
     // Delete files logic
   }
-  const RenderCard = () => {
-    if (state.fileResources.length === 0) {
-      return (
-        <Card shadow="lg" radius="sm" withBorder mt="md" p="xl">
-          <Card.Section>
-            <Group px="lg">
-              <b>lineage-flow:// </b>
-              <Anchor>{repository.repo_name}</Anchor> /{" "}
-              <Anchor>{state.selectedBranch}</Anchor>{" "}
-            </Group>
-          </Card.Section>
-          <Divider my="lg" />
-          <Stack px="xl">
-            <Title>To get started with this repository, you can: </Title>
-            <List>
-              <List.Item>
-                <Anchor onClick={() => handleChangeState("uploadObject", true)}>
-                  Upload{" "}
-                </Anchor>
-                an object
-              </List.Item>
-            </List>
-          </Stack>
-        </Card>
-      );
-    } else {
-      const organizedFiles = organizeFiles(state.fileResources);
-      return (
-        <Card shadow="lg" radius="sm" withBorder mt="md" p="xl">
-          <Card.Section>
-            <Group px="lg">
-              <b>lineage-flow://</b> <Anchor>{repository.repo_name}</Anchor> /{" "}
-              <Anchor>{state.selectedBranch}</Anchor>
-            </Group>
-          </Card.Section>
-          <Divider my="lg" />
-          <Stack px="xl">
-            <RenderFileStructure
-              folderContents={organizedFiles}
-              filesToDelete={filesToDelete}
-              setFilesToDelete={setFilesToDelete}
-            />
-          </Stack>
-        </Card>
-      );
-    }
-  };
 
   return (
     <Stack px="8%">
+      {uncommittedChanges && (
+        <Notification
+          mt="lg"
+          color="red"
+          title="We notify you that:"
+          icon={<IconExclamationMark />}
+        >
+          <Text c="red">
+            You have uncommitted changes.{" "}
+            <Anchor onClick={() => onUncommittedChanges(uncommittedChanges)}>
+              Click here
+            </Anchor>{" "}
+            to commit them.
+          </Text>
+        </Notification>
+      )}
       <Group justify="space-between" mt="md">
         <Select
           data={repository.branches.map((branch) => branch.branch_name)}
@@ -179,7 +132,14 @@ export default function ObjectsPage({ repository }: Props) {
           </Stack>
         </Card>
       ) : (
-        <RenderCard />
+        <RepositoryCard
+          fileResources={state.fileResources}
+          repository={repository}
+          selectedBranch={state.selectedBranch}
+          onUploadObject={() => handleChangeState("uploadObject", true)}
+          filesToDelete={filesToDelete}
+          setFilesToDelete={setFilesToDelete}
+        />
       )}
       {state.uploadObject && (
         <UploadObjectModal
@@ -187,6 +147,7 @@ export default function ObjectsPage({ repository }: Props) {
           branch={state.selectedBranch as string}
           storage_bucket={repository.bucket_url}
           opened={state.uploadObject}
+          onUpload={(formData) => setUncommittedChanges(formData)}
           onClose={() => handleChangeState("uploadObject", false)}
         />
       )}
@@ -195,7 +156,7 @@ export default function ObjectsPage({ repository }: Props) {
           <Button color="red">
             Confirm Delete {filesToDelete.length} file
             {filesToDelete.length > 1 && "s"}
-          </Button>{" "}
+          </Button>
         </Group>
       )}
     </Stack>
