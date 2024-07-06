@@ -24,6 +24,13 @@ class GCS:
             return match.group(1)
         raise ValueError("Invalid bucket URL")
     
+    def pull_data(self, url):
+        response = requests.get(url)
+        if response.status_code == 200: 
+            return response.content 
+        else:
+            response.raise_for_status()
+    
     def get_file_metadata(self, bucket_link, object_name):
         bucket_name = self.get_bucket_name(bucket_link)
         bucket = self.client.bucket(bucket_name)

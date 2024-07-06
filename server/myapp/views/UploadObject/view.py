@@ -107,6 +107,7 @@ class UploadObjectView(APIView):
 
                     new_range = Range.objects.create()
                     existing_ranges = list(meta_obj.ranges.all())
+                    updated_ranges = []
 
                     # Process files
                     for file_data in object_metadata:
