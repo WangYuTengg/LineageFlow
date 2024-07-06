@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Anchor,
   Card,
@@ -8,9 +9,11 @@ import {
   Autocomplete,
   Button,
   Code,
+  ActionIcon,
 } from "@mantine/core";
 import { Branch } from "../schema";
-import { IconSearch, IconPlus } from "@tabler/icons-react";
+import { IconSearch, IconPlus, IconTrash } from "@tabler/icons-react";
+import CreateBranchModal from "./create-branch-modal";
 
 interface Props {
   branches: Branch[];
@@ -46,14 +49,20 @@ function timeAgo(dateString: string) {
   return Math.floor(seconds) + " seconds ago";
 }
 export default function BranchesPage({ branches, defaultBranch }: Props) {
-  console.log(branches);
+  const [createBranch, setCreateBranch] = useState(false);
+
   return (
     <Stack px="8%">
       <Group justify="space-between" mt="md">
         <Text size="xl" fw={700}>
           Branches
         </Text>
-        <Button leftSection={<IconPlus />} variant="light" color="teal">
+        <Button
+          leftSection={<IconPlus />}
+          variant="light"
+          color="teal"
+          onClick={() => setCreateBranch(true)}
+        >
           New Branch
         </Button>
       </Group>
@@ -79,23 +88,83 @@ export default function BranchesPage({ branches, defaultBranch }: Props) {
                   Branch
                 </Text>
                 <Text size="md" fw={600}>
-                  Id
+                  Created
                 </Text>
                 <Text size="md" fw={600}>
                   Updated
                 </Text>
+                <Text size="md" fw={600}>
+                  Actions
+                </Text>
               </Group>
               <Divider my="lg" />
               <Group justify="space-between" px="lg">
-                <Anchor size="lg">{defaultBranch.branch_name}</Anchor>
-                <Code>{defaultBranch.branch_id}</Code>
+                <Group>
+                  <Anchor size="lg">{defaultBranch.branch_name}</Anchor>
+                  <Code>{defaultBranch.branch_id}</Code>
+                </Group>
+                <Text>
+                  Created <b>{timeAgo(defaultBranch.created_timestamp)}</b>
+                </Text>
                 <Text>
                   Updated <b>{timeAgo(defaultBranch.updated_timestamp)}</b>
                 </Text>
+                <ActionIcon variant="subtle" c="red">
+                  <IconTrash />
+                </ActionIcon>
               </Group>
             </Card.Section>
           </Card>
         ))}
+      <Text fw={600}>Other Branches</Text>
+      {branches
+        .filter((branch) => branch.branch_name !== defaultBranch)
+        .map((defaultBranch) => (
+          <Card shadow="lg" radius="sm" withBorder p="xl">
+            <Card.Section>
+              <Group
+                justify="space-between"
+                px="lg"
+                style={{ marginBottom: "1em", marginTop: "0.5em" }}
+              >
+                <Text size="md" fw={600}>
+                  Branch
+                </Text>
+                <Text size="md" fw={600}>
+                  Created
+                </Text>
+                <Text size="md" fw={600}>
+                  Updated
+                </Text>
+                <Text size="md" fw={600}>
+                  Actions
+                </Text>
+              </Group>
+              <Divider my="lg" />
+              <Group justify="space-between" px="lg">
+                <Group>
+                  <Anchor size="lg">{defaultBranch.branch_name}</Anchor>
+                  <Code>{defaultBranch.branch_id}</Code>
+                </Group>
+                <Text>
+                  Created <b>{timeAgo(defaultBranch.created_timestamp)}</b>
+                </Text>
+                <Text>
+                  Updated <b>{timeAgo(defaultBranch.updated_timestamp)}</b>
+                </Text>
+                <ActionIcon variant="subtle" c="red">
+                  <IconTrash />
+                </ActionIcon>
+              </Group>
+            </Card.Section>
+          </Card>
+        ))}
+      {createBranch && (
+        <CreateBranchModal
+          opened={createBranch}
+          onClose={() => setCreateBranch(false)}
+        />
+      )}
     </Stack>
   );
 }
