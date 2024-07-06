@@ -1,5 +1,6 @@
 from django.urls import path
 from .views.UploadObject.view import UploadObjectView
+from .views.GetAllRepo.view import GetRepoView
 from .views.onboard.view import OnboardingView
 from .view import (
     CommitView,
@@ -7,7 +8,6 @@ from .view import (
     LoginView,
     CreateUserView,
     GetObjectsView,
-    GetRepoView,
 )
 
 urlpatterns = [
