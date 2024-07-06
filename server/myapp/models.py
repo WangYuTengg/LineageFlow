@@ -41,7 +41,7 @@ class Commit(models.Model):
     add = models.ManyToManyField(Files, default=[], related_name="add_set")
     edit = models.ManyToManyField(
         Files, default=[], related_name="edit_set"
-    )  # TODO how to differentiate different versions of files with same name
+    )  
     remove = models.ManyToManyField(Files, default=[], related_name="remove_set")
 
     class Meta:
