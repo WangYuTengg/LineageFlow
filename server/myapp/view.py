@@ -13,12 +13,17 @@ from .serializers import (
     UserSerializer,
     RoleSerializer,
 )
-from .models import Item, Range, MetaRange, Commit, Branch, Users, UserToRepo, Repo, Files
-
-
-class HelloWorldView(APIView):
-    def get(self, request):
-        return Response("Hello world", status=status.HTTP_200_OK)
+from .models import (
+    Item,
+    Range,
+    MetaRange,
+    Commit,
+    Branch,
+    Users,
+    UserToRepo,
+    Repo,
+    Files,
+)
 
 
 class CreateRepositoryView(APIView):
@@ -49,25 +54,6 @@ class CreateRepositoryView(APIView):
         else:
             print("Validation errors:", repo_instance.errors)
         return Response(repo_instance.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# testing on the cloud db
-# class TestView(APIView):
-#     def get(self, request):
-#         items = Item.objects.all()
-#         serializer = ItemSerializer(items, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
-#     def post(self, request):
-#         serializer = ItemSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             response_data = {
-#                 "message": "Data Inserted Successfully",
-#                 "data": serializer.data,
-#             }
-#             return Response(response_data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RangeView(APIView):
@@ -104,26 +90,6 @@ class MetaView(APIView):
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class FilesView(APIView):
-    def get(self, request):
-        branch_id=request.query_params.get("branch_id")
-        commit_obj=Branch.objects.get(branch_id=branch_id).commit_id
-        meta=Commit.objects.get(comm_id=commit_obj.commit_id).meta_id
-        print(meta)
-        # ranges_obj=MetaRange.objects.get(meta_id=commit_obj.meta_id)
-        # print(ranges_obj)
-        # files=Files.objects.filter(range_id__in=ranges_obj.all()).values_list()
-
-        # serializer = CommitSerializer(data=commit)
-        # if serializer.is_valid():
-            # print(serializer.data)
-        # meta=Commit.objects.get(pk=commit)
-        # ranges=MetaRange.objects.get()
-        # print("ranges", ranges)
-        # files=Range.objects.filter(range_id__in=ranges.all()).values("files")
-        # print("files", files)
-        # return Response(files, status=status.HTTP_200_OK)
 
 
 class CommitView(APIView):
@@ -163,42 +129,17 @@ class BranchView(APIView):
         new_branch = Branch.objects.create(
             branch_name=request.data.get("branch_name"),
             commit_id=old_commit,
-            repo_id=repo_id)
+            repo_id=repo_id,
+        )
         serializer = BranchSerializer(instance=new_branch)
         response_data = {
             "message": "Branch Created Successfully",
             "data": serializer.data,
-        }   
+        }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
-class GetRepoView(APIView):
-    def get(self, request):
-        username = request.query_params.get("username")
-        try:
-            user = Users.objects.get(username=username)
-        except Users.DoesNotExist:
-            return Response(
-                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list('repo_id', flat=True)
-        # print("User Repos:", repo_ids)
-        repo_list = Users.objects.get(username=username).repos
-        repos = Repo.objects.filter(pk__in=repo_list.all()).values()
-        print(repos)
-        # repo_data = [{"repo_id": repo.repo_id, "repo_name": repo.repo_name, "description": repo.description, "storage_bucket_url": repo.bucket_url} for repo in repos]
-        
-        response_data = {}
-        for repo in repos:
-            branches = Branch.objects.filter(repo_id=repo["repo_id"])
-            serializer = BranchSerializer(branches, many=True)
-            resp_data = {"details": repo}
-            resp_data["branches"] = serializer.data
-            response_data[repo["repo_name"]] = resp_data
-            
-        return Response(response_data, status=status.HTTP_200_OK)
 
-
+# AUTH VIEWS
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -225,6 +166,8 @@ class CreateUserView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)
 
+
+# GET VIEWS
 class GetObjectsView(APIView):
     def get(self, request):
         repo_id = request.query_params.get("id")
@@ -242,38 +185,38 @@ class GetObjectsView(APIView):
         return Response({"files": kvs}, status=status.HTTP_200_OK)
 
 
-# class GetRepoView(APIView):
-#     def get(self, request):
-#         username = request.query_params.get("username")
-#         try:
-#             user = Users.objects.get(username=username)
-#         except Users.DoesNotExist:
-#             return Response(
-#                 {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
-#             )
+class GetRepoView(APIView):
+    def get(self, request):
+        username = request.query_params.get("username")
+        try:
+            user = Users.objects.get(username=username)
+        except Users.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
-#         repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list(
-#             "repo_id", flat=True
-#         )
-#         print("User Repos:", repo_ids)
+        repo_ids = UserToRepo.objects.filter(user_id=user.user_id).values_list(
+            "repo_id", flat=True
+        )
+        print("User Repos:", repo_ids)
 
-#         repos = Repo.objects.filter(repo_id__in=repo_ids)
-#         repo_data = [
-#             {
-#                 "repo_id": repo.repo_id,
-#                 "repo_name": repo.repo_name,
-#                 "description": repo.description,
-#                 "storage_bucket_url": repo.bucket_url,
-#             }
-#             for repo in repos
-#         ]
+        repos = Repo.objects.filter(repo_id__in=repo_ids)
+        repo_data = [
+            {
+                "repo_id": repo.repo_id,
+                "repo_name": repo.repo_name,
+                "description": repo.description,
+                "storage_bucket_url": repo.bucket_url,
+            }
+            for repo in repos
+        ]
 
-#         response_data = {}
-#         for repo in repo_data:
-#             branches = Branch.objects.filter(repo_id=repo["repo_id"])
-#             serializer = BranchSerializer(branches, many=True)
-#             resp_data = {"details": repo}
-#             resp_data["branches"] = serializer.data
-#             response_data[repo["repo_name"]] = resp_data
+        response_data = {}
+        for repo in repo_data:
+            branches = Branch.objects.filter(repo_id=repo["repo_id"])
+            serializer = BranchSerializer(branches, many=True)
+            resp_data = {"details": repo}
+            resp_data["branches"] = serializer.data
+            response_data[repo["repo_name"]] = resp_data
 
-#         return Response(response_data, status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_200_OK)
