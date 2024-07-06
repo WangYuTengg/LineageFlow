@@ -61,12 +61,13 @@ export default function ObjectsPage({
         }
       );
       const data: { files: FileResource[] } = await response.json();
-      console.log(data)
-      console.log(data.files)
-      const files = data.files.flat(1).map((file) => ({
-        ...file,
-        meta_data: JSON.parse(file.meta_data as unknown as string),
-      }));
+      const files = data.files.flat(1).map((file) => {
+        const parseOnce = JSON.parse(file.meta_data as unknown as string);
+        return {
+          ...file,
+          meta_data: JSON.parse(parseOnce as unknown as string),
+        };
+      });
       if (response.ok) {
         handleChangeState("fileResources", files);
       } else {
