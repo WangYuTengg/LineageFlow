@@ -11,13 +11,12 @@ import {
   Code,
   ActionIcon,
 } from "@mantine/core";
-import { Branch } from "../schema";
+import { Repository } from "../schema";
 import { IconSearch, IconPlus, IconTrash } from "@tabler/icons-react";
 import CreateBranchModal from "./create-branch-modal";
 
 interface Props {
-  branches: Branch[];
-  defaultBranch: string;
+  selectedRepository: Repository;
 }
 
 function timeAgo(dateString: string) {
@@ -48,8 +47,10 @@ function timeAgo(dateString: string) {
   }
   return Math.floor(seconds) + " seconds ago";
 }
-export default function BranchesPage({ branches, defaultBranch }: Props) {
+export default function BranchesPage({ selectedRepository }: Props) {
   const [createBranch, setCreateBranch] = useState(false);
+  const branches = selectedRepository.branches;
+  const defaultBranch = selectedRepository.default_branch;
 
   return (
     <Stack px="8%">
@@ -163,6 +164,7 @@ export default function BranchesPage({ branches, defaultBranch }: Props) {
         <CreateBranchModal
           opened={createBranch}
           onClose={() => setCreateBranch(false)}
+          selectedRepository={selectedRepository}
         />
       )}
     </Stack>

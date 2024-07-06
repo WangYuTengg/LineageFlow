@@ -55,6 +55,7 @@ export const createRepositorySchema = z.object({
 
 export const createBranchSchema = z.object({
   branchName: z.string().min(1, "Enter a branch name"),
+  parent: z.string().min(1, "Enter a parent branch"),
 });
 
 export const uploadObjectModalSchema = z.object({

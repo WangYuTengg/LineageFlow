@@ -67,10 +67,7 @@ export function RepositoryTabs({ selectedRepository }: Props) {
         />
       </Tabs.Panel>
       <Tabs.Panel value="branches">
-        <BranchesPage
-          branches={selectedRepository.branches}
-          defaultBranch={selectedRepository.default_branch}
-        />
+        <BranchesPage selectedRepository={selectedRepository} />
       </Tabs.Panel>
       <Tabs.Panel value="commits">Commits tab content</Tabs.Panel>
 
