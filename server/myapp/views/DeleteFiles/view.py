@@ -4,10 +4,8 @@ from rest_framework import status
 from django.utils import timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from myapp.models import Branch, Repo, Range, Commit, MetaRange, File
-from myapp.serializers import FilesSerializer
 from myapp.gcs_utils import GCS
 from django.db import transaction, IntegrityError, DatabaseError
-from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
 class DeleteFile(APIView):
@@ -41,6 +39,9 @@ class DeleteFile(APIView):
         
         latest_commit = branch.commits.first()
         
+        if not latest_commit:
+            return Response({"error": "No commits found in branch"}, status=status.HTTP_404_NOT_FOUND)
+        
         latest_metarange = latest_commit.meta_range
         
         with transaction.atomic():
@@ -50,9 +51,6 @@ class DeleteFile(APIView):
                 
                 if old_range in processed_ranges:
                     new_range_excluding_removed = processed_ranges[old_range]
-                    new_range_excluding_removed.remove(file_instance)
-                    processed_ranges[old_range] = new_range_excluding_removed
-
                 else:
                     old_range_files = list(old_range.files.all())
                     old_range_files.remove(file_instance)
@@ -71,18 +69,21 @@ class DeleteFile(APIView):
                 except Exception as e:
                     return Response({"error": f"Error deleting file from GCS: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            latest_metarange.ranges.set(updated_ranges)
-            latest_metarange.save()
+            # Create a new MetaRange and set the updated ranges
+            new_metarange = MetaRange.objects.create()
+            new_metarange.ranges.set(updated_ranges)
+            new_metarange.save()
 
             # Create a new commit
             new_commit = Commit.objects.create(
                 branch=branch,
-                created_timestamp=timezone.now()
+                created_timestamp=timezone.now(),
+                meta_range=new_metarange
             )
             new_commit.remove.set(File.objects.filter(url__in=urls_to_delete))
             new_commit.save()
 
-            latest_metarange.commit = new_commit
-            latest_metarange.save()
+            new_metarange.commit = new_commit
+            new_metarange.save()
 
         return Response({"commit_id": new_commit.commit_id}, status=status.HTTP_201_CREATED)
