@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
-    FilesSerializer,
     RangeSerializer,
     CommitSerializer,
     BranchSerializer,
@@ -104,23 +103,3 @@ class CreateUserView(APIView):
             }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(user_instance.errors, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class GetObjectsView(APIView):
-    def get(self, request):
-        # repo_id = request.query_params.get("id")
-        # branch = request.query_params.get("branch")
-        # branch = Branch.objects.get(repo_id=repo_id, branch_name=branch)
-        branch_id = request.query_params.get("branch_id")
-        branch = Branch.objects.get(branch_id=branch_id)
-
-        commit = branch.commit_id
-        metarange = commit.meta_id
-        ranges = metarange.ranges.all()
-        kvs = []
-        for range in ranges:
-            files = range.files.all()
-            serializer = FilesSerializer(files, many=True)
-            kvs.append(serializer.data)
-
-        return Response({"files": kvs}, status=status.HTTP_200_OK)
