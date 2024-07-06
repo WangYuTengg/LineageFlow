@@ -32,8 +32,11 @@ class GetRepoView(APIView):
             repo_data = {
                 "repo_id": repo.repo_id,
                 "repo_name": repo.repo_name,
+                "default_branch": repo.default_branch,
                 "description": repo.description,
                 "bucket_url": repo.bucket_url,
+                "created_timestamp": repo.created_timestamp,
+                "updated_timestamp": repo.updated_timestamp,
                 "branches": [],
             }
 
