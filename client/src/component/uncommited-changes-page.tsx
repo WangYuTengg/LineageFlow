@@ -68,7 +68,6 @@ export default function UncommittedChangesPage({
         commit_message: commitMessage,
         files_list: uncommittedChanges.changes.map((change) => change.file),
       };
-      console.log(data);
       const response = await fetch("/api/deleteFiles/", {
         method: "POST",
         headers: {
