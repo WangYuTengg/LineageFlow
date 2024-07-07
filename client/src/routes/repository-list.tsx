@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useRepo } from "../repo";
 import CreateRepository from "../component/create-repo-button";
 import { timeAgo } from "../component/branches-page";
+import { IconGitBranch } from "@tabler/icons-react";
 
 export default function Repositories() {
   const navigate = useNavigate();
@@ -48,6 +49,12 @@ export default function Repositories() {
           <Text size="lg" fw={500}>
             Description: {repo.description}
           </Text>
+          <Group>
+            <Text size="lg" fw={500}>
+              Default branch: {repo.default_branch}{" "}
+            </Text>
+            <IconGitBranch style={{ color: "gray" }} />
+          </Group>
           <Text size="lg" fw={500}>
             Bucket Name: {repo.bucket_url.split(".com/")[1].split("/")[0]}
           </Text>
