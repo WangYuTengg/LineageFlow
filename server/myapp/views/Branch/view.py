@@ -21,7 +21,7 @@ class BranchView(APIView):
         source_repo = Repo.objects.get(repo_id=repo_id)
         print("Source repo found:", source_repo)
 
-        source_branch = Branch.objects.get(repo_id=repo_id, branch_name=parent_branch)
+        source_branch = Branch.objects.get(repo=source_repo, branch_name=parent_branch)
         print("Source branch found:", source_branch)
 
         source_commit = (
@@ -30,36 +30,60 @@ class BranchView(APIView):
             .first()
         )
         print("Source commit found:", source_commit)
+        if not source_commit:
+            with transaction.atomic():
+                new_branch = Branch.objects.create(
+                    branch_name=branch_name,
+                    repo=source_repo,
+                )
+                print("New branch created:", new_branch)
 
-        source_metarange = MetaRange.objects.get(commit=source_commit)
-        print("Source metarange found:", source_metarange)
+                # create new commit
+                new_commit = Commit.objects.create(
+                    branch=new_branch,
+                    commit_message=f"New branch created from {parent_branch} branch.",
+                )
+                print("New commit created:", new_commit)
 
-        with transaction.atomic():
-            # create new branch
-            new_branch = Branch.objects.create(
-                branch_name=branch_name,
-                repo=source_repo,
-            )
-            print("New branch created:", new_branch)
+                # empty meta_range (no ranges)
+                new_meta_range = MetaRange.objects.create()
+                new_meta_range.commit = new_commit
+                print("New meta range created:", new_meta_range)
 
-            # create new commit for new branch
-            new_commit = Commit.objects.create(
-                branch=new_branch,
-                commit_message=f"New branch created from {parent_branch} branch.",
-            )
-            print("New commit created:", new_commit)
+                new_branch.save()
+                new_commit.save()
+                new_meta_range.save()
 
-            # create new meta range for new commit
-            new_meta_range = MetaRange.objects.create()
-            new_meta_range.commit = new_commit
-            print("New meta range created:", new_meta_range)
+        else:
+            source_metarange = MetaRange.objects.get(commit=source_commit)
+            print("Source metarange found:", source_metarange)
 
-            new_meta_range.ranges.add(*source_metarange.ranges.all())
-            print("Ranges added to new meta range:", new_meta_range.ranges.all())
+            with transaction.atomic():
+                # create new branch
+                new_branch = Branch.objects.create(
+                    branch_name=branch_name,
+                    repo=source_repo,
+                )
+                print("New branch created:", new_branch)
 
-            new_branch.save()
-            new_commit.save()
-            new_meta_range.save()
+                # create new commit for new branch
+                new_commit = Commit.objects.create(
+                    branch=new_branch,
+                    commit_message=f"New branch created from {parent_branch} branch.",
+                )
+                print("New commit created:", new_commit)
+
+                # create new meta range for new commit
+                new_meta_range = MetaRange.objects.create()
+                new_meta_range.commit = new_commit
+                print("New meta range created:", new_meta_range)
+
+                new_meta_range.ranges.add(*source_metarange.ranges.all())
+                print("Ranges added to new meta range:", new_meta_range.ranges.all())
+
+                new_branch.save()
+                new_commit.save()
+                new_meta_range.save()
 
         return Response(
             {
