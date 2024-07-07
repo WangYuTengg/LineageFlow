@@ -65,7 +65,7 @@ export default function Repositories() {
   return (
     <Stack p="xl">
       <Group justify="space-between">
-        <Title order={2}>Your repositories</Title>
+        <Title order={2}>Your Data Repositories</Title>
         <CreateRepository
           username={userName}
           onCreate={async () => {
