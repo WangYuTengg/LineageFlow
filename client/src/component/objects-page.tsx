@@ -52,7 +52,6 @@ export default function ObjectsPage({
     async function fetchFiles() {
       handleChangeState("isLoading", true);
       const response = await fetch(
-        // `/api/getCommitData/?repo=${repository.repo_name}&branch=${state.selectedBranch}`,
         `/api/getObjects/?id=${repository.repo_id}&branch=${state.selectedBranch}`,
         {
           headers: {
@@ -68,14 +67,10 @@ export default function ObjectsPage({
           if (typeof metaData === "string") {
             metaData = JSON.parse(metaData);
           }
-          // Check if metaData is still a string and attempt to parse again
           if (typeof metaData === "string") {
             metaData = JSON.parse(metaData);
           }
         } catch (e) {
-          console.error("Error parsing meta_data:", e);
-          console.error("Problematic meta_data:", metaData);
-          // Optionally, you can assign a default value or keep the original string
           metaData = {
             name: "Unknown",
             size: 0,
@@ -138,6 +133,8 @@ export default function ObjectsPage({
             onClick={() => {
               handleChangeState("refresh", !state.refresh);
               setFilesToDelete([]);
+              setUncommittedChanges(null);
+              setShowNotif(false);
             }}
           >
             <IconRefresh />
@@ -181,7 +178,7 @@ export default function ObjectsPage({
         <Group justify="flex-end">
           <Button
             color="red"
-            onClick={() =>
+            onClick={() => {
               setUncommittedChanges({
                 repo: repository.repo_name,
                 branch: state.selectedBranch,
@@ -190,8 +187,9 @@ export default function ObjectsPage({
                   file,
                   type: "Delete",
                 })),
-              })
-            }
+              });
+              setShowNotif(true);
+            }}
           >
             Confirm Delete {filesToDelete.length} file
             {filesToDelete.length > 1 && "s"}
