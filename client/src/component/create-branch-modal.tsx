@@ -9,7 +9,6 @@ import {
 } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { createBranchSchema, Repository } from "../schema";
-import { useAuth } from "../auth";
 import { useState } from "react";
 
 interface Props {
@@ -23,7 +22,6 @@ export default function CreateBranchModal({
   onClose,
   selectedRepository,
 }: Props) {
-  const { userName } = useAuth();
   const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {
@@ -45,14 +43,13 @@ export default function CreateBranchModal({
         },
         method: "POST",
         body: JSON.stringify({
-          username: userName,
-          repo_name: selectedRepository.repo_name,
-          parent: values.parent,
+          repo_id: selectedRepository.repo_id,
+          parent_branch: values.parent,
           branch_name: values.branchName,
         }),
       });
       if (response.ok) {
-        alert("Successfuly created branch!");
+        alert("Successfully created branch!");
         onClose();
       } else {
         alert("Failed to create branch!");
