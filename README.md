@@ -9,24 +9,29 @@ Easily track data versions and lineage through the machine learning lifecycle.
     - [Value Proposition](#value-proposition)
     - [Tech Stack](#tech-stack)
     - [Architecture](#architecture)
+    - [Database Design](#database-design)
 - [Features](#features)
-    - [Data Versioning](#data-versioning)
-    - [Lineage Tracking](#lineage-tracking)
-    - [Collaboration](#collaboration)
-    - [Google Cloud Integration](#google-cloud-integration)
-- [Roadmap for Scalability and Availability](#roadmap-for-scalability-and-availability)
+    - [Features](#features)
+    - [Repositories](#repository)
+    - [Objects view](#objects)
+    - [Staging area](#staging)
+    - [Branches](#branches)
+    - [Commits](#commits)
+    - [Settings](#settings)
+- [Future Plans](#future-plans)
+- [Challenges](#challenges-faced)
+- [Contributors](#-contributors)
 
 ## About
 ### <a name="problem-statement"></a>❓ Problem Statement
 How can we develop a tool that tracks data versions and lineage through the machine learning lifecycle, helping data scientists understand how datasets have changed over time and how different versions of datasets affect model performance?
 
 ### <a name="motivation"></a>💡 Motivation
-As datasets evolve, tracking their changes and understanding their impact on machine learning models becomes increasingly complex. LineageFlow aims to simplify this process by providing an intuitive tool for data versioning and lineage tracking, ensuring data manageability, quality, and reproducibility.
+As datasets evolve, tracking their changes and understanding their impact on machine learning models becomes increasingly complex. LineageFlow aims to simplify this process by providing an intuitive tool for data versioning and lineage tracking, ensuring data manageability, quality, and reproducibility. We strive to build a solid foundation, for everything data, ML & AI related. 
 
 ### <a name="target-audience"></a>🧑 Target Audience
-- Data Scientists
+- Data Scientists and Engineers
 - Machine Learning Engineers
-- Data Engineers
 - Organizations needing robust data management solutions
 
 ### <a name="value-proposition"></a>❗ Value Proposition
@@ -50,51 +55,93 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 - Django REST Framework
 
 **Storage**:
-- Supabase PostgresSQL for storing file object pointers
-- Google Cloud Bucket for storing file objects
+- Supabase PostgresSQL
+- Google Cloud Storage
+
+**Dependencies/Libraries**:
+- [Client](https://github.com/WangYuTengg/LineageFlow/blob/main/client/package.json)
+- [Server](https://github.com/WangYuTengg/LineageFlow/blob/main/server/requirements.txt)
 
 ### <a name="architecture"></a>🔨 Architecture
-![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/architecture-diagram.jpg)
+![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/architecture-diagram.jpg)
+- We store our actual objects and data in Google Cloud Storage, and pointers to the data in our Postgres SQL Database
 
-## Features
-### <a name="data-versioning"></a>📂 Data Versioning
-Aim:
-- Enable users to track changes in their datasets using Git-like semantics.
+### <a name='database-design'></a>🛠️ Database design
+![Data Hierarchy Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/data_hierarchy.jpg)
+- In order to support data-versioning using Git-like semantics, we followed the above data hierarchy which sculpted our database schemas and design decisions.
+- With this, we are able to implement version control when operations such as add, delete, and edit are done on the data.
 
-*Current Features:*
-- Branches, commits, merges, and rollbacks
-- Blame functionality to identify the origin of each data change
-- Ability to view datasets as they appeared before transformations
+<ul>
+  <li>
+    1. Adding Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/adding_objects.jpg" alt="Add Object Diagram">
+  </li>
+  <li>
+    2. Deleting Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/deleting_objects.jpg" alt="Delete Object Diagram">
+  </li>
+  <li>
+    3. Editing Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/editing_objects.jpg" alt="Edit Object Diagram">
+  </li>
+</ul>
 
-### <a name="lineage-tracking"></a>🗂 Lineage Tracking
-Aim:
-- Provide comprehensive tracking of data lineage to ensure reproducibility and quality.
+## ✔️ Current Features
+### <a name='repository'></a>1. Repositories
+![Repositories Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/repo-list.JPG)
+- Simple user signup, login and auth flow
+- View your repositories
+- Create a new repository (with an option the repository to existing cloud bucket)
 
-*Features:*
-- Detailed lineage graphs
-- Visualization of data transformations
-- Impact analysis of dataset changes on models
+### <a name='objects'></a>2. Objects view
+![Objects Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/objects-page.JPG)
+- View objects in file & folder structure
+- Upload objects into repository (local files and folders) 
+- Download/View/Delete objects
 
-### <a name="collaboration"></a>🤝 Collaboration
-Aim:
-- Facilitate collaboration among data practitioners.
+### <a name='staging'></a>3. Staging area
+![Uncommitted Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/uncommited-changes-page.JPG)
+- Move to staging area before uncommitted changes are committed
+- View changes before making them
+- Enter a commit message
 
-*Features:*
-- Shared repositories for datasets
-- Collaborative editing and version control
-- Role-based access control
+### <a name='branches'></a>4. Branches
+![Branch Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/branches-page.JPG)
+- A single repository can have multiple branches
+- Create branch from a parent branch
+- Each branch has its own commit history, and data versioning
 
-### <a name="google-cloud-integration"></a>☁️ Google Cloud Integration
-Aim:
-- Seamless integration with Google Cloud Storage for managing data.
+### <a name='commits'></a>5. Commits
+![Commit Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/commits-page.JPG)
+- View detailed commit history of selected branch (files added/deleted/edited) in a timeline view
+- Rollback/revert to a certain commit in history
 
-*Features:*
-- Direct storage and retrieval of data from Google Cloud Bucket
-- Restore functionalities
-- Scalable storage solutions
+### <a name='settings'></a>6. Settings
+![Settings Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/settings-page.JPG)
+- Rename your repository
+- Switch/rename default branch
+- Delete your repository
+- View collaborators
 
-## Future Plans
+## 📅 Future Plans
+- Immediate improvements to be made are: 
+    - **Cloud Integration**: Incorporate other cloud buckets (e.g. AWS S3, Azure blob storage, CloudFare R2 etc.)
+    - **Collaboration**: Enable collaboration through adding user roles, invites, branch merging etc.
+    - **Deployment**: Deploy our product to quickly iterate based on real usage.
 
+- The possibilities are endless:
+    - **Feature Store**: Integrate a feature store to manage and share features across different machine learning models, ensuring consistency and reusability.
+    - **Automated ML Pipeline**: Develop automated machine learning pipelines to streamline data preprocessing, model training, evaluation, and deployment, increasing efficiency and reducing manual intervention.
+    - **Data Quality Monitoring**: Implement data quality monitoring and alerting systems to detect anomalies, ensuring data integrity and reliability throughout the machine learning lifecycle.
+
+## 🏆 Challenges Faced
+- Designing the database correctly was most crucial and we should have spent more time on it, a lot of time was wasted on re-migrations because we realised our database schemas did not work.
+- Integration with google cloud bucket proved to be technically difficult, facing issues such as authentication 
+- Underestimated scope of project and faced time constraints
+- All in all, we are proud of what we accomplished in a week of building and for tackling a difficult problem statement.
 
 ## ✍🏻 Contributors
 * [Jayden](https://github.com/MomPansy) - Fullstack
