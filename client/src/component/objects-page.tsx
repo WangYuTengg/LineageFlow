@@ -170,7 +170,10 @@ export default function ObjectsPage({
           branch={state.selectedBranch as string}
           storage_bucket={repository.bucket_url}
           opened={state.uploadObject}
-          onUpload={(formData) => setUncommittedChanges(formData)}
+          onUpload={(formData) => {
+            setUncommittedChanges(formData);
+            setShowNotif(true);
+          }}
           onClose={() => handleChangeState("uploadObject", false)}
         />
       )}
