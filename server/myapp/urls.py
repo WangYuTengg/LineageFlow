@@ -5,13 +5,11 @@ from .views.GetAllObject.view import GetObjectsView
 from .views.onboard.view import OnboardingView
 from .views.DeleteFiles.view import DeleteFile
 from .views.FetchFiles.view import FetchLatestCommitDataView
+from .views.Commit.view import CommitView
+from .views.Branch.view import BranchView
 from .views.Login.view import (
     LoginView,
     CreateUserView,
-)
-from .view import (
-    CommitView,
-    BranchView,
 )
 
 urlpatterns = [
