@@ -10,6 +10,7 @@ import {
   Button,
   Code,
   ActionIcon,
+  SimpleGrid,
 } from "@mantine/core";
 import { Repository } from "../schema";
 import { IconSearch, IconPlus, IconTrash } from "@tabler/icons-react";
@@ -77,14 +78,10 @@ export default function BranchesPage({ selectedRepository }: Props) {
       <Text fw={600}>Default</Text>
       {branches
         .filter((branch) => branch.branch_name === defaultBranch)
-        .map((defaultBranch) => (
-          <Card shadow="lg" radius="sm" withBorder p="xl">
+        .map((branch, index) => (
+          <Card shadow="lg" radius="sm" withBorder p="xl" key={index}>
             <Card.Section>
-              <Group
-                justify="space-between"
-                px="lg"
-                style={{ marginBottom: "1em", marginTop: "0.5em" }}
-              >
+              <SimpleGrid cols={4} spacing="xl" px="md">
                 <Text size="md" fw={600}>
                   Branch
                 </Text>
@@ -97,37 +94,34 @@ export default function BranchesPage({ selectedRepository }: Props) {
                 <Text size="md" fw={600}>
                   Actions
                 </Text>
-              </Group>
+              </SimpleGrid>
               <Divider my="lg" />
-              <Group justify="space-between" px="lg">
+              <SimpleGrid cols={4} spacing="xl" px="md">
                 <Group>
-                  <Anchor size="lg">{defaultBranch.branch_name}</Anchor>
-                  <Code>{defaultBranch.branch_id}</Code>
+                  <Anchor size="lg">{branch.branch_name}</Anchor>
+                  <Code>{branch.branch_id}</Code>
                 </Group>
+
                 <Text>
-                  Created <b>{timeAgo(defaultBranch.created_timestamp)}</b>
+                  Created <b>{timeAgo(branch.created_timestamp)}</b>
                 </Text>
                 <Text>
-                  Updated <b>{timeAgo(defaultBranch.updated_timestamp)}</b>
+                  Updated <b>{timeAgo(branch.updated_timestamp)}</b>
                 </Text>
-                <ActionIcon variant="subtle" c="red">
+                <ActionIcon variant="subtle" color="red">
                   <IconTrash />
                 </ActionIcon>
-              </Group>
+              </SimpleGrid>
             </Card.Section>
           </Card>
         ))}
       <Text fw={600}>Other Branches</Text>
       {branches
         .filter((branch) => branch.branch_name !== defaultBranch)
-        .map((defaultBranch) => (
-          <Card shadow="lg" radius="sm" withBorder p="xl">
+        .map((branch, index) => (
+          <Card shadow="lg" radius="sm" withBorder p="xl" key={index}>
             <Card.Section>
-              <Group
-                justify="space-between"
-                px="lg"
-                style={{ marginBottom: "1em", marginTop: "0.5em" }}
-              >
+              <SimpleGrid cols={4} spacing="xl" px="md">
                 <Text size="md" fw={600}>
                   Branch
                 </Text>
@@ -140,23 +134,26 @@ export default function BranchesPage({ selectedRepository }: Props) {
                 <Text size="md" fw={600}>
                   Actions
                 </Text>
-              </Group>
+              </SimpleGrid>
               <Divider my="lg" />
-              <Group justify="space-between" px="lg">
-                <Group>
-                  <Anchor size="lg">{defaultBranch.branch_name}</Anchor>
-                  <Code>{defaultBranch.branch_id}</Code>
+              <SimpleGrid cols={4} spacing="xl" px="md">
+                <Group wrap="nowrap">
+                  <Anchor size="lg">{branch.branch_name}</Anchor>
+                  <Code>
+                    <Text lineClamp={1}>{branch.branch_id} </Text>
+                  </Code>
                 </Group>
+
                 <Text>
-                  Created <b>{timeAgo(defaultBranch.created_timestamp)}</b>
+                  Created <b>{timeAgo(branch.created_timestamp)}</b>
                 </Text>
                 <Text>
-                  Updated <b>{timeAgo(defaultBranch.updated_timestamp)}</b>
+                  Updated <b>{timeAgo(branch.updated_timestamp)}</b>
                 </Text>
-                <ActionIcon variant="subtle" c="red">
+                <ActionIcon variant="subtle" color="red">
                   <IconTrash />
                 </ActionIcon>
-              </Group>
+              </SimpleGrid>
             </Card.Section>
           </Card>
         ))}
