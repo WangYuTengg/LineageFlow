@@ -56,7 +56,6 @@ class MetaRange(models.Model):
         "Commit", related_name="meta_range", on_delete=models.CASCADE, null=True
     )
 
-    
     def __str__(self):
         return str(self.meta_id)
 

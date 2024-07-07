@@ -61,6 +61,7 @@ export default function ObjectsPage({
         }
       );
       const data: { files: FileResource[] } = await response.json();
+      console.log(data)
       const files = data.files.flat(1).map((file) => {
         let metaData = file.meta_data;
         try {
