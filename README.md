@@ -58,6 +58,10 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 - Supabase PostgresSQL
 - Google Cloud Storage
 
+**Dependencies/Libraries**:
+- [Client](https://github.com/WangYuTengg/LineageFlow/blob/main/client/package.json)
+- [Server](https://github.com/WangYuTengg/LineageFlow/blob/main/server/requirements.txt)
+
 ### <a name="architecture"></a>🔨 Architecture
 ![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/architecture-diagram.jpg)
 - We store our actual objects and data in Google Cloud Storage, and pointers to the data in our Postgres SQL Database
@@ -86,36 +90,36 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 </ul>
 
 ## ✔️ Current Features
-### <a name='repository'></a> Repositories
+### <a name='repository'></a>1. Repositories
 ![Repositories Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/repo-list.JPG)
 - Simple user signup, login and auth flow
 - View your repositories
 - Create a new repository (with an option the repository to existing cloud bucket)
 
-### <a name='objects'></a> Objects view
+### <a name='objects'></a>2. Objects view
 ![Objects Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/objects-page.JPG)
 - View objects in file & folder structure
 - Upload objects into repository (local files and folders) 
 - Download/View/Delete objects
 
-### <a name='staging'></a> Staging area
+### <a name='staging'></a>3. Staging area
 ![Uncommitted Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/uncommited-changes-page.JPG)
 - Move to staging area before uncommitted changes are committed
 - View changes before making them
 - Enter a commit message
 
-### <a name='branches'></a> Branches
+### <a name='branches'></a>4. Branches
 ![Branch Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/branches-page.JPG)
 - A single repository can have multiple branches
 - Create branch from a parent branch
 - Each branch has its own commit history, and data versioning
 
-### <a name='commits'></a> Commits
+### <a name='commits'></a>5. Commits
 ![Commit Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/commits-page.JPG)
 - View detailed commit history of selected branch (files added/deleted/edited) in a timeline view
 - Rollback/revert to a certain commit in history
 
-### <a name='settings'></a> Settings
+### <a name='settings'></a>6. Settings
 ![Settings Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/settings-page.JPG)
 - Rename your repository
 - Switch/rename default branch
