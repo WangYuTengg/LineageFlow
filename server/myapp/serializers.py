@@ -13,10 +13,6 @@ from django.db import transaction, IntegrityError
 
 
 class FilesSerializer(serializers.ModelSerializer):
-    range = serializers.PrimaryKeyRelatedField(
-        queryset=Range.objects.all(), required=True
-    )
-
     class Meta:
         model = File
         fields = [
