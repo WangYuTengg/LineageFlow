@@ -8,18 +8,27 @@ import {
   Select,
   Timeline,
 } from "@mantine/core";
-import { Repository } from "../schema";
+import { Commit, Repository } from "../schema";
+import { useAuth } from "../auth";
+import {
+  IconGitCommit,
+  IconGitPullRequest,
+  IconPlus,
+} from "@tabler/icons-react";
+import { timeAgo } from "./branches-page";
 
 interface Props {
   selectedRepository: Repository;
 }
 
 export default function CommitsPage({ selectedRepository }: Props) {
+  const branches = selectedRepository.branches;
+  const { userName } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(
     selectedRepository.default_branch
   );
-  const branches = selectedRepository.branches;
+  const [commits, setCommits] = useState<Commit[]>([]);
 
   useEffect(() => {
     async function fetchCommitsOfBranch() {
@@ -40,7 +49,12 @@ export default function CommitsPage({ selectedRepository }: Props) {
           }
         );
         const data = await response.json();
-        console.log(data);
+        if (response.ok) {
+          setCommits(data);
+        } else {
+          console.error(data);
+          alert("Error fetching commits of branch");
+        }
       } catch (error) {
         console.error(error);
         alert("Error fetching commits of branch");
@@ -49,7 +63,7 @@ export default function CommitsPage({ selectedRepository }: Props) {
     }
 
     fetchCommitsOfBranch();
-  }, []);
+  }, [branches, selectedBranch]);
 
   return (
     <Stack px="8%">
@@ -67,7 +81,55 @@ export default function CommitsPage({ selectedRepository }: Props) {
           onChange={(value) => setSelectedBranch(value)}
         />
       </Group>
-      <Card shadow="lg" radius="sm" withBorder p="xl"></Card>
+      <Card shadow="lg" radius="sm" withBorder p="xl">
+        <Timeline active={1} bulletSize={24} lineWidth={2}>
+          {commits.map((commit) => (
+            <Timeline.Item
+              title={commit.commit_message}
+              bullet={<IconGitCommit size={12} />}
+              key={commit.commit_id}
+            >
+              <Text c="dimmed" size="sm">
+                <b>{userName}</b> committed changes
+              </Text>
+              <Text size="xs" mt={4}>
+                {timeAgo(commit.created_timestamp)}
+              </Text>
+            </Timeline.Item>
+          ))}
+
+          <Timeline.Item
+            title="Created Default Branch"
+            bullet={<IconGitPullRequest size={12} />}
+          >
+            <Text c="dimmed" size="sm">
+              <b>{userName}</b> created default branch:{" "}
+              <b>"{selectedRepository.default_branch}"</b>{" "}
+            </Text>
+            <Text size="xs" mt={4}>
+              {timeAgo(
+                selectedRepository.branches.filter(
+                  (branch) =>
+                    branch.branch_name === selectedRepository.default_branch
+                )[0].created_timestamp
+              )}
+            </Text>
+          </Timeline.Item>
+
+          <Timeline.Item
+            title="Created Repository"
+            bullet={<IconPlus size={12} />}
+          >
+            <Text c="dimmed" size="sm">
+              <b>{userName}</b> created <b>"{selectedRepository.repo_name}"</b>{" "}
+              repository
+            </Text>
+            <Text size="xs" mt={4}>
+              {timeAgo(selectedRepository.created_timestamp)}
+            </Text>
+          </Timeline.Item>
+        </Timeline>
+      </Card>
     </Stack>
   );
 }

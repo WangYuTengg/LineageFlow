@@ -1,5 +1,9 @@
 import { z } from "zod";
-
+export interface Commit {
+  commit_id: string;
+  commit_message: string;
+  created_timestamp: string;
+}
 export interface UncommittedChanges {
   repo: string;
   branch: string;
