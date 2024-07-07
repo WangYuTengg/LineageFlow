@@ -9,8 +9,8 @@ import {
 import RepositoryPage from "./objects-page";
 import { Repository, UncommittedChanges } from "../schema";
 import { useState } from "react";
-import UncommittedChangesPage from "./uncommited-changes";
-import BranchesPage from "./branches";
+import UncommittedChangesPage from "./uncommited-changes-page";
+import BranchesPage from "./branches-page";
 
 const iconStyle = { width: rem(16), height: rem(16) };
 
@@ -63,7 +63,10 @@ export function RepositoryTabs({ selectedRepository }: Props) {
         <UncommittedChangesPage
           uncommittedChanges={uncommittedChanges}
           repository={selectedRepository}
-          onDone={() => setActiveTab("objects")}
+          onDone={() => {
+            setActiveTab("objects");
+            setUncommittedChanges(null);
+          }}
         />
       </Tabs.Panel>
       <Tabs.Panel value="branches">
