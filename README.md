@@ -85,7 +85,7 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
   </li>
 </ul>
 
-## Current Features
+## ✔️ Current Features
 ### <a name='repository'></a> Repositories
 ![Repositories Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/repo-list.JPG)
 - Simple user signup, login and auth flow
@@ -122,7 +122,7 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 - Delete your repository
 - View collaborators
 
-## Future Plans
+## 📅 Future Plans
 - Immediate improvements to be made are: 
     - **Cloud Integration**: Incorporate other cloud buckets (e.g. AWS S3, Azure blob storage, CloudFare R2 etc.)
     - **Collaboration**: Enable collaboration through adding user roles, invites, branch merging etc.
@@ -133,10 +133,11 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
     - **Automated ML Pipeline**: Develop automated machine learning pipelines to streamline data preprocessing, model training, evaluation, and deployment, increasing efficiency and reducing manual intervention.
     - **Data Quality Monitoring**: Implement data quality monitoring and alerting systems to detect anomalies, ensuring data integrity and reliability throughout the machine learning lifecycle.
 
-## Challenges Faced
+## 🏆 Challenges Faced
 - Designing the database correctly was most crucial and we should have spent more time on it, a lot of time was wasted on re-migrations because we realised our database schemas did not work.
 - Integration with google cloud bucket proved to be technically difficult, facing issues such as authentication 
 - Underestimated scope of project and faced time constraints
+- All in all, we are proud of what we accomplished in a week of building and for tackling a difficult problem statement.
 
 ## ✍🏻 Contributors
 * [Jayden](https://github.com/MomPansy) - Fullstack
