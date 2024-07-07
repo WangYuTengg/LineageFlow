@@ -28,7 +28,8 @@ class Test(APIView):
         repo = self.get_repo(repo_name)
         branch = self.get_branch(repo, branch_name)
         
-        latest_commit = branch.commits.first()
+        latest_commit = Commit.objects.filter(branch=branch).order_by('-created_timestamp').first()
+        print(latest_commit)
         
         gcs = GCS()
         
@@ -106,7 +107,7 @@ class Test(APIView):
         for file, relative_path in zip(files, relative_paths):
             file_name = f"{repo_name}/{branch_name}/{relative_path}"
             print(f'Processing file: {file_name}')
-            existing_file = File.objects.filter(file_name=file_name).first()
+            existing_file = File.objects.filter(file_name=file_name).order_by('-version').first()
 
             if not existing_file:
                 # Upload and create file for the first time
@@ -122,8 +123,9 @@ class Test(APIView):
                 
                 # From the list of ranges that this meta range contains remove this range that belongs to the existing file
                 print("all_existing_ranges before", all_existing_ranges)
-                all_existing_ranges.remove(existing_range_obj)
-                print("all_existing_ranges after", all_existing_ranges)
+                if existing_range_obj in all_existing_ranges:
+                    all_existing_ranges.remove(existing_range_obj)
+                    print("all_existing_ranges after", all_existing_ranges)
 
                 # append this range to a dictionary that stores the repeating files and the range it belongs to
                 existing_ranges.setdefault(existing_range_obj, []).append(existing_file)

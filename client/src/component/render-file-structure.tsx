@@ -96,7 +96,7 @@ export default function RenderFileStructure({
               <Group>
                 <IconFile />
                 <Anchor
-                  href={file.url.replace("?", "%3F").replace("=", "%3D")}
+                  href={file.loc.replace("?", "%3F").replace("=", "%3D")}
                   key={file.meta_data.name}
                   target="_blank"
                   size="md"
@@ -112,7 +112,7 @@ export default function RenderFileStructure({
                   radius="xl"
                   variant="subtle"
                   c="teal"
-                  onClick={() => handleDownload(file.url)}
+                  onClick={() => handleDownload(file.loc)}
                 >
                   <IconDownload />
                 </ActionIcon>

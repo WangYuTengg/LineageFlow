@@ -1,11 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from myapp.serializers import (
-    FilesSerializer,
-)
+from myapp.serializers import FilesSerializer
 from myapp.models import Branch, Commit, MetaRange, Range, File
-
 
 class GetObjectsView(APIView):
     def get(self, request):
@@ -27,7 +24,7 @@ class GetObjectsView(APIView):
         kvs = []
         for range in ranges:
             files = range.files.all()
-            serializer = FilesSerializer(files, many=True)
-            kvs.append(serializer.data)
+            serializer = FilesSerializer(files, many=True, context={'request': request})
+            kvs.extend(serializer.data)  # Use extend to flatten the list
 
         return Response({"files": kvs}, status=status.HTTP_200_OK)
