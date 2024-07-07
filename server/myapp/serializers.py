@@ -13,14 +13,24 @@ from django.db import transaction, IntegrityError
 
 
 class FilesSerializer(serializers.ModelSerializer):
-    range = serializers.PrimaryKeyRelatedField(queryset=Range.objects.all(), required=True)
+    range = serializers.PrimaryKeyRelatedField(
+        queryset=Range.objects.all(), required=True
+    )
 
     class Meta:
         model = File
-        fields = ["id", "file_name", "loc", "meta_data", "version", "range"]  # include other necessary fields
+        fields = [
+            "id",
+            "file_name",
+            "loc",
+            "meta_data",
+            "version",
+            "range",
+        ]  # include other necessary fields
 
     def create(self, validated_data):
         return File.objects.create(**validated_data)
+
 
 class RangeSerializer(serializers.ModelSerializer):
     files = serializers.PrimaryKeyRelatedField(queryset=File.objects.all(), many=True)
@@ -51,16 +61,16 @@ class MetaRangeSerializer(serializers.ModelSerializer):
 
 
 class CommitSerializer(serializers.ModelSerializer):
-    meta_id = serializers.PrimaryKeyRelatedField(queryset=MetaRange.objects.all())
     branch_id = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all())
 
     class Meta:
         model = Commit
-        fields = ["commit_id", "meta_id", "timestamp"]
+        fields = ["commit_id", "commit_message", "created_timestamp", "branch_id"]
 
     def create(self, validated_data):
         commit_instance = Commit.objects.create(**validated_data)
         return commit_instance
+
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:

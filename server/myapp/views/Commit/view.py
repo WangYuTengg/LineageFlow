@@ -13,6 +13,8 @@ class CommitView(APIView):
     def get(self, request):
         branch = request.query_params.get("branch_id")
         commits = Commit.objects.all().filter(branch_id=branch)
+        print(commits)
+
         serializer = CommitSerializer(commits, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
