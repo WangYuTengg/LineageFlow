@@ -22,7 +22,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  IconTruck,
+  IconBinaryTree,
   IconNotification,
   IconCode,
   IconBook,
@@ -101,7 +101,7 @@ export default function Navbar() {
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
           <Group>
-            <IconTruck size={30} />
+            <IconBinaryTree size={30} />
             <Text size="lg" fw="500">
               LineageFlow
             </Text>
