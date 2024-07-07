@@ -114,27 +114,42 @@ class Test(APIView):
                 new_file_obj = self.upload_and_create_file(file, relative_path, repo_name, branch_name, storage_bucket_url, gcs)
                 files_first_time_added.append(new_file_obj)
             else:
+                # if the file exists
                 # Handle existing file by creating a new version
                 print(f'Existing file found: {file_name}, creating new version')
+                # get range of existing file
                 existing_range_obj = existing_file.range
+                
+                # From the list of ranges that this meta range contains remove this range that belongs to the existing file
+                print("all_existing_ranges before", all_existing_ranges)
                 all_existing_ranges.remove(existing_range_obj)
-                
+                print("all_existing_ranges after", all_existing_ranges)
+
+                # append this range to a dictionary that stores the repeating files and the range it belongs to
                 existing_ranges.setdefault(existing_range_obj, []).append(existing_file)
+                print("existing ranges", existing_ranges)
                 
+                # push the edited file to gcs
                 new_file_obj = self.upload_and_create_file(file, relative_path, repo_name, branch_name, storage_bucket_url, gcs, existing_file.version + 1)
                 files_edited.append(new_file_obj)
+                print("files edited: ", files_edited)
         
+        print("files edited after loop: ", files_edited)
+        print("existing ranges after", existing_ranges)
         all_remaining_files = []
         for rjo, outer in existing_ranges.items():
+            print(rjo, outer)
             remaining_files = list(rjo.files.exclude(id__in=[f.id for f in outer]))
+            print("remaining files", remaining_files)
             all_remaining_files.extend(remaining_files)
+            all_remaining_files.extend(files_edited)
         
+        print("all remaining files after", all_remaining_files)
         # Partition remaining files and create ranges
         print(f'Partitioning remaining files: {len(all_remaining_files)}')
         partitions = self.partition_files_by_size(all_remaining_files)
         list_of_range_objects = self.create_ranges_and_partitions(partitions)
         all_existing_ranges.extend(list_of_range_objects)
-
         print('Creating metarange and commit')
         self.create_metarange_and_commit(branch, all_existing_ranges, list_of_file_obj_add=files_first_time_added, list_of_file_edit=files_edited)
     

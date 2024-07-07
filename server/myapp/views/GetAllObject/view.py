@@ -21,8 +21,9 @@ class GetObjectsView(APIView):
         latest_commit = commits.first()  # return latest commit
         print("latest_commit:", latest_commit)
         meta_range = MetaRange.objects.get(commit=latest_commit)
-        print(meta_range)
+        print("meta_range", meta_range)
         ranges = meta_range.ranges.all()
+        print("ranges", ranges)
         kvs = []
         for range in ranges:
             files = range.files.all()
