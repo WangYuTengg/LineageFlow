@@ -97,9 +97,13 @@ export default function BranchesPage({ selectedRepository }: Props) {
               </SimpleGrid>
               <Divider my="lg" />
               <SimpleGrid cols={4} spacing="xl" px="md">
-                <Group>
+                <Group wrap="nowrap">
                   <Anchor size="lg">{branch.branch_name}</Anchor>
-                  <Code>{branch.branch_id}</Code>
+                  <Code px="xs">
+                    <Text lineClamp={1} size="xs">
+                      {branch.branch_id}
+                    </Text>
+                  </Code>
                 </Group>
 
                 <Text>
@@ -139,8 +143,10 @@ export default function BranchesPage({ selectedRepository }: Props) {
               <SimpleGrid cols={4} spacing="xl" px="md">
                 <Group wrap="nowrap">
                   <Anchor size="lg">{branch.branch_name}</Anchor>
-                  <Code>
-                    <Text lineClamp={1}>{branch.branch_id} </Text>
+                  <Code px="xs">
+                    <Text lineClamp={1} size="xs">
+                      {branch.branch_id}
+                    </Text>
                   </Code>
                 </Group>
 
