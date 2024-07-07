@@ -34,24 +34,27 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 
 ### <a name="tech-stack"></a>💻 Tech Stack
 ![React](https://img.shields.io/badge/React-%23061DAFB.svg?style=for-the-badge&logo=React&logoColor=white)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-%23092E20.svg?style=for-the-badge&logo=Django&logoColor=white)
+![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
 ![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
 
 **Client**:
 - React
+- Vite
 
 **Backend**:
 - Django
-- Supabase Postgres for storing file object pointers
+- Django REST Framework
 
 **Storage**:
+- Supabase PostgresSQL for storing file object pointers
 - Google Cloud Bucket for storing file objects
 
 ### <a name="architecture"></a>🔨 Architecture
-LineageFlow adopts a client-server architecture designed for scalability and ease of use.
-
-![Architecture Diagram](link-to-your-architecture-diagram)
+![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/architecture-diagram.jpg)
 
 ## Features
 ### <a name="data-versioning"></a>📂 Data Versioning
@@ -90,57 +93,12 @@ Aim:
 - Restore functionalities
 - Scalable storage solutions
 
-## Roadmap for Scalability and Availability
-**Phase 1️⃣: Assessment and Planning**
-1. Define Objectives and Metrics
-    - Establish performance metrics and scalability goals.
-2. Current State Analysis
-    - Evaluate existing infrastructure and identify potential bottlenecks.
-3. User and Traffic Analysis
-    - Understand user behavior, peak usage times, and geographic distribution.
-4. Cost Analysis
-    - Budget estimation for scalability improvements.
+## Future Plans
 
-**Phase 2️⃣: Architecture and Design**
-1. Microservices Architecture
-    - Modularize services for authentication, data management, and versioning.
-2. Containerization and Orchestration
-    - Use Docker and Kubernetes for efficient resource management.
-3. Load Balancing
-    - Implement load balancing to distribute traffic and ensure high availability.
-4. Database Scaling
-    - Use sharding and replication strategies for PostgreSQL.
-5. Caching Strategies
-    - Implement Redis for caching frequently accessed data.
-
-**Phase 3️⃣: Infrastructure and Deployment**
-1. Cloud Adoption
-    - Deploy on Google Cloud Platform.
-2. Auto-scaling
-    - Configure auto-scaling policies to adjust resources based on demand.
-3. Data Replication and Backup
-    - Implement cross-region data replication and automated backups.
-
-**Phase 4️⃣: Monitoring and Optimization**
-1. Real-time Monitoring
-    - Use Google Cloud Monitoring for real-time performance tracking.
-2. Performance Testing
-    - Regular load testing to identify and mitigate performance bottlenecks.
-3. Disaster Recovery Plan
-    - Develop and test a comprehensive disaster recovery plan.
-
-**Phase 5️⃣: Scaling and Growth**
-1. Scalability Testing
-    - Conduct tests to ensure the system can handle increased loads.
-2. User Feedback
-    - Continuously gather and implement user feedback.
-3. Global Expansion
-    - Expand services to new regions, focusing on scalability and availability.
-
-![Scalability Plan](link-to-your-scalability-plan-diagram)
 
 ## ✍🏻 Contributors
-* [Your Name]([your-github-profile-link])
-* [Contributor Name]([contributor-github-profile-link])
+* [Jayden](https://github.com/MomPansy) - Fullstack
+* [Wang Yu Teng](https://github.com/WangYuTengg) - Fullstack 
+* [Pei Yee](https://github.com/heypeiyee) - Database, Backend
 
 Feel free to customize the links and content as needed for your specific project.
