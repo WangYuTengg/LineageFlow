@@ -143,43 +143,15 @@ class GCS:
             }
             
             data_object_pointer = {
-                f"{bucket_link}{blob.name}" : metadata
+                "loc": f"{bucket_link}/{blob.name}",
+                "metadata": metadata
             }
             objects_metadata.append(data_object_pointer)
 
-        objects_metadata.sort(key=lambda x: list(x.keys())[0])
+        objects_metadata.sort(key=lambda x: x["loc"])
 
         return objects_metadata
 
-    def group_into_ranges(self, objects_metadata, max_size=2 * 1024 * 1024):
-        ranges = []
-        current_range = {}
-        current_size = 0
-
-        for metadata_dict in objects_metadata:
-            # Extract the key (URL) and metadata
-            url = metadata_dict['url']
-            metadata = metadata_dict['meta_data']
-
-            try:
-                metadata_str = json.dumps(metadata)
-                metadata_size = len(metadata_str.encode('utf-8'))
-            except (TypeError, ValueError) as e:
-                print(f"Error serializing metadata: {metadata} -> {e}")
-                continue
-
-                if current_size + metadata_size > max_size:
-                    ranges.append(current_range)
-                    current_range = {}
-                    current_size = 0
-
-            current_range[url] = metadata
-            current_size += metadata_size
-
-        if current_range:
-            ranges.append(current_range)
-
-        return ranges
 
 def send_metadata_to_api(bucket_url, metadata):
     url = "http://your-api-endpoint.com/your-endpoint"

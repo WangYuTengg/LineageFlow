@@ -103,7 +103,7 @@ export default function RenderFileStructure({
                   c={filesToDelete.includes(file) ? "red" : "blue"}
                   rel="noopener noreferrer"
                 >
-                  {file.meta_data.name.split("/").pop()}
+                  {file.file_name.split("/").pop()}
                 </Anchor>
               </Group>
               <Group>
