@@ -51,6 +51,7 @@ class BranchView(APIView):
 
             # create new meta range for new commit
             new_meta_range = MetaRange.objects.create()
+            new_meta_range.commit = new_commit
             print("New meta range created:", new_meta_range)
 
             new_meta_range.ranges.add(*source_metarange.ranges.all())
