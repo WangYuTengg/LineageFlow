@@ -8,7 +8,7 @@ import {
   TextInput,
   Button,
 } from "@mantine/core";
-import { FileResource, Repository, UncommittedChanges } from "../schema";
+import { Repository, UncommittedChanges } from "../schema";
 import { IconPlus, IconMinus, IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 
@@ -31,8 +31,9 @@ export default function UncommittedChangesPage({
     try {
       const formData = new FormData();
       formData.append("repo", uncommittedChanges.repo);
-      formData.append("branch_name", uncommittedChanges.branch);
+      formData.append("branch", uncommittedChanges.branch);
       formData.append("commit_message", commitMessage);
+      formData.append("storage_bucket", uncommittedChanges.storage_bucket);
       uncommittedChanges.changes.forEach((change) => {
         const file = change.file as File;
         formData.append("files", file as File);
@@ -130,12 +131,14 @@ export default function UncommittedChangesPage({
               </Group>
             </Group>
           ))}
-          <Group mt="md">
+          <Group mt="md" align="flex-end">
             <TextInput
               style={{ width: "350px" }}
               value={commitMessage}
               onChange={(event) => setCommitMessage(event.target.value)}
               placeholder="Enter commit message"
+              withAsterisk
+              label="Commit message"
             />
             <Button
               color="blue"
@@ -154,6 +157,7 @@ export default function UncommittedChangesPage({
                   handleDelete();
                 }
               }}
+              disabled={commitMessage.length === 0}
               loading={isLoading}
             >
               Commit
