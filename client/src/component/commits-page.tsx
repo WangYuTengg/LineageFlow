@@ -5,13 +5,17 @@ import {
   Group,
   Stack,
   Text,
+  Popover,
   Select,
   Timeline,
   ActionIcon,
+  Button,
+  Code,
 } from "@mantine/core";
 import { Commit, FileResource, Repository } from "../schema";
 import { useAuth } from "../auth";
 import {
+  IconArrowBackUp,
   IconGitCommit,
   IconGitPullRequest,
   IconPlus,
@@ -42,6 +46,12 @@ export default function CommitsPage({ selectedRepository }: Props) {
     edits: [],
     deletes: [],
   });
+
+  const currentCommit = state.commits.sort(
+    (a, b) =>
+      new Date(b.created_timestamp).getTime() -
+      new Date(a.created_timestamp).getTime()
+  )[0];
 
   function handleSetState<K extends keyof typeof state>(
     key: K,
@@ -88,6 +98,32 @@ export default function CommitsPage({ selectedRepository }: Props) {
     fetchCommitsOfBranch();
   }, [branches, selectedBranch, refresh]);
 
+  async function handleRevert(commit: Commit) {
+    try {
+      const response = await fetch(`/api/revertCommit/`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          commit: currentCommit.commit_id,
+          target_commit: commit.commit_id,
+        }),
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert("Reverted commit successfully");
+        setRefresh((r) => !r);
+      } else {
+        console.error(data);
+        alert("Error reverting commit");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error reverting commit");
+    }
+  }
+
   return (
     <Stack px="8%">
       <Text size="xl" fw={700} mt="md">
@@ -114,7 +150,12 @@ export default function CommitsPage({ selectedRepository }: Props) {
           <Timeline active={1} bulletSize={24} lineWidth={2}>
             {state.commits.map((commit) => (
               <Timeline.Item
-                title={commit.commit_message}
+                title={
+                  <Group align="center" gap="md">
+                    <Text> {commit.commit_message}</Text>
+                    <Code>{commit.commit_id}</Code>
+                  </Group>
+                }
                 bullet={<IconGitCommit size={12} />}
                 key={commit.commit_id}
               >
@@ -150,6 +191,41 @@ export default function CommitsPage({ selectedRepository }: Props) {
                     files={state.deletes}
                     commit={commit}
                   />
+                )}
+                {commit.commit_id !== currentCommit.commit_id && (
+                  <Group mt="md">
+                    <Popover
+                      width={200}
+                      position="bottom"
+                      withArrow
+                      shadow="md"
+                    >
+                      <Popover.Target>
+                        <Button
+                          variant="subtle"
+                          size="sm"
+                          c="dimmed"
+                          leftSection={<IconArrowBackUp />}
+                        >
+                          Revert to this commit
+                        </Button>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <Text size="md" mb="md" fw={600}>
+                          Are you sure?
+                        </Text>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          color="red"
+                          fullWidth
+                          onClick={() => handleRevert(commit)}
+                        >
+                          Revert
+                        </Button>
+                      </Popover.Dropdown>
+                    </Popover>
+                  </Group>
                 )}
               </Timeline.Item>
             ))}
