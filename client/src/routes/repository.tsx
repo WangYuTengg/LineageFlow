@@ -1,25 +1,21 @@
 import { Stack, Group, Anchor } from "@mantine/core";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RepositoryTabs } from "../component/repository-tabs";
 import { type Repository } from "../schema";
 import { useAuth } from "../auth";
+import { useRepo } from "../repo";
 
 export default function Repository() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { repo } = location.state;
+  const params = useParams();
+  const { repositories, fetchRepositories } = useRepo();
   const { userName } = useAuth();
 
-  const repository: Repository = {
-    repo_id: repo.repo_id,
-    repo_name: repo.repo_name,
-    description: repo.description,
-    default_branch: repo.default_branch,
-    branches: repo.branches,
-    created_timestamp: repo.created_timestamp,
-    bucket_url: repo.bucket_url,
-    updated_timestamp: repo.updated_timestamp,
-  };
+  const repository = repositories.find((r) => r.repo_name === params.repo_name);
+  if (!repository) {
+    navigate(`/u/${userName}/repositories`);
+    return null;
+  }
 
   return (
     <>
@@ -33,7 +29,10 @@ export default function Repository() {
             Repositories
           </Anchor>
         </Group>
-        <RepositoryTabs selectedRepository={repository} />
+        <RepositoryTabs
+          selectedRepository={repository}
+          onCreateBranch={async () => await fetchRepositories()}
+        />
       </Stack>
     </>
   );

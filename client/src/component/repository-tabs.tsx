@@ -18,6 +18,7 @@ const iconStyle = { width: rem(16), height: rem(16) };
 
 interface Props {
   selectedRepository: Repository;
+  onCreateBranch(): void;
 }
 
 const tabsData = [
@@ -32,7 +33,7 @@ const tabsData = [
   { value: "settings", iconComponent: IconSettings, label: "Settings" },
 ];
 
-export function RepositoryTabs({ selectedRepository }: Props) {
+export function RepositoryTabs({ selectedRepository, onCreateBranch }: Props) {
   const [activeTab, setActiveTab] = useState<string | null>("objects");
   const [uncommittedChanges, setUncommittedChanges] =
     useState<UncommittedChanges | null>(null);
@@ -72,7 +73,10 @@ export function RepositoryTabs({ selectedRepository }: Props) {
         />
       </Tabs.Panel>
       <Tabs.Panel value="branches">
-        <BranchesPage selectedRepository={selectedRepository} />
+        <BranchesPage
+          selectedRepository={selectedRepository}
+          onCreateBranch={onCreateBranch}
+        />
       </Tabs.Panel>
       <Tabs.Panel value="commits">
         <CommitsPage selectedRepository={selectedRepository} />

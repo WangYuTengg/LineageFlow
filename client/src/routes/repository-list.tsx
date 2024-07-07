@@ -8,44 +8,22 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useState, useCallback } from "react";
 import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
+import { useRepo } from "../repo";
 import CreateRepository from "../component/create-repo-button";
-import { Repository } from "../schema";
 import { timeAgo } from "../component/branches-page";
 
 export default function Repositories() {
   const navigate = useNavigate();
   const { userName } = useAuth();
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-
-  const fetchRepositories = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/getAllRepo?username=${userName}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "GET",
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setRepositories(data);
-      } else {
-        console.error(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, [userName]);
-
-  useState(() => {
-    fetchRepositories();
-  });
+  const { repositories, fetchRepositories } = useRepo();
 
   const RenderRepositories = repositories.map((repo) => {
     const handleClick = () => {
-      navigate(`/u/${userName}/r/${repo.repo_name}`, { state: { repo } });
+      navigate(`/u/${userName}/r/${repo.repo_name}`, {
+        state: { repo },
+      });
     };
 
     return (
@@ -90,7 +68,9 @@ export default function Repositories() {
         <Title order={2}>Your repositories</Title>
         <CreateRepository
           username={userName}
-          onCreate={async () => fetchRepositories()}
+          onCreate={async () => {
+            await fetchRepositories();
+          }}
         />
       </Group>
       {repositories.length ? (

@@ -18,6 +18,7 @@ import CreateBranchModal from "./create-branch-modal";
 
 interface Props {
   selectedRepository: Repository;
+  onCreateBranch(): void;
 }
 
 export function timeAgo(dateString: string) {
@@ -48,7 +49,10 @@ export function timeAgo(dateString: string) {
   }
   return Math.floor(seconds) + " seconds ago";
 }
-export default function BranchesPage({ selectedRepository }: Props) {
+export default function BranchesPage({
+  selectedRepository,
+  onCreateBranch,
+}: Props) {
   const [createBranch, setCreateBranch] = useState(false);
   const branches = selectedRepository.branches;
   const defaultBranch = selectedRepository.default_branch;
@@ -166,7 +170,10 @@ export default function BranchesPage({ selectedRepository }: Props) {
       {createBranch && (
         <CreateBranchModal
           opened={createBranch}
-          onClose={() => setCreateBranch(false)}
+          onClose={() => {
+            setCreateBranch(false);
+            onCreateBranch();
+          }}
           selectedRepository={selectedRepository}
         />
       )}
