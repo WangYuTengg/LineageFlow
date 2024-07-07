@@ -6,84 +6,83 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from myapp.models import Branch, Repo, Range, Commit, MetaRange, File
 from myapp.gcs_utils import GCS
 from django.db import transaction, IntegrityError, DatabaseError
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
 class DeleteFile(APIView):
+    
+    """
+        file = {
+            "file_name":
+            "id": 
+            "loc":
+            "metadata" : 
+            "range":  
+        }
+    """
     def post(self, request):
-        urls_to_delete = request.data.getlist('files_list')
+        files = request.data.getlist('files_list')
         repo_name = request.data.get('repo')
         branch_name = request.data.get('branch')
         
-        if len(urls_to_delete) < 1:
-            return Response({"error": "No files to delete"}, status=status.HTTP_400_BAD_REQUEST)
+        repo = self.get_repo(repo_name)
+        branch = self.get_branch(repo, branch_name)
+
+        latest_commit = Commit.objects.filter(branch=branch).order_by('-created_timestamp').first()
+        metarange = latest_commit.meta_range
+        all_ranges = list(metarange.ranges.all())
         
+        files_to_delete = []
+
+        for file in files: 
+            target_range = file["range"]
+            all_ranges.remove(target_range)
+            files_to_delete.append(file)
+            
+        try:
+            self.create_metarange_and_commit(branch, all_ranges, files_to_delete)
+            return Response({"message": "Files deleted successfully."}, status=status.HTTP_200_OK)
+        except (IntegrityError, DatabaseError) as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+    def get_repo(self, repo_name):
         try:
             repo = Repo.objects.get(repo_name=repo_name)
+            print(f'Found repo: {repo_name}')
+            return repo
         except Repo.DoesNotExist:
-            return Response({"error": "Repo not found"}, status=status.HTTP_404_NOT_FOUND)
-        except DatabaseError as e:
-            return Response({"error": f"Database error while fetching repo: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            print(f'Repository "{repo_name}" not found')
+            raise ValidationError(f"Repository '{repo_name}' not found")
+    
+    def get_branch(self, repo, branch_name):
         try:
             branch = Branch.objects.get(repo=repo, branch_name=branch_name)
+            print(f'Found branch: {branch_name} in repo: {repo.repo_name}')
+            return branch
         except Branch.DoesNotExist:
-            return Response({"error": "Branch not found"}, status=status.HTTP_404_NOT_FOUND)
-        except DatabaseError as e:
-            return Response({"error": f"Database error while fetching branch: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f'Branch "{branch_name}" not found in repository "{repo.repo_name}"')
+            raise ValidationError(f"Branch '{branch_name}' not found in repository '{repo.repo_name}'")
         
-        storage_bucket = repo.bucket_url
-        gcs = GCS()
-        
-        updated_ranges = []
-        processed_ranges = {}
-        
-        latest_commit = branch.commits.first()
-        
-        if not latest_commit:
-            return Response({"error": "No commits found in branch"}, status=status.HTTP_404_NOT_FOUND)
-        
-        latest_metarange = latest_commit.meta_range
-        
+    def create_metarange_and_commit(self, branch, list_of_range_objects, list_of_file_obj_delete=[]):
         with transaction.atomic():
-            for url in urls_to_delete:
-                file_instance = get_object_or_404(File, url=url)
-                old_range = file_instance.range
-                
-                if old_range in processed_ranges:
-                    new_range_excluding_removed = processed_ranges[old_range]
-                else:
-                    old_range_files = list(old_range.files.all())
-                    old_range_files.remove(file_instance)
-                    
-                    new_range_excluding_removed = Range.objects.create()
-                    new_range_excluding_removed.files.set(old_range_files)
-                    
-                    processed_ranges[old_range] = new_range_excluding_removed
-
-                updated_ranges = [r for r in latest_metarange.ranges.all() if r != old_range]
-                updated_ranges.append(new_range_excluding_removed)
-                
-                # Delete the file from the GCS bucket
-                try:
-                    gcs.delete_file(storage_bucket, url)
-                except Exception as e:
-                    return Response({"error": f"Error deleting file from GCS: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            # Create a new MetaRange and set the updated ranges
+            print('Creating MetaRange and Commit')
             new_metarange = MetaRange.objects.create()
-            new_metarange.ranges.set(updated_ranges)
-            new_metarange.save()
+            new_metarange.ranges.add(*list_of_range_objects)
 
-            # Create a new commit
+            # Create the commit without linking the meta_range initially
             new_commit = Commit.objects.create(
                 branch=branch,
-                created_timestamp=timezone.now(),
-                meta_range=new_metarange
+                commit_message="Auto-generated commit"  # Add a default message or adjust as necessary
             )
-            new_commit.remove.set(File.objects.filter(url__in=urls_to_delete))
-            new_commit.save()
 
+            # Link the meta_range to the commit
             new_metarange.commit = new_commit
             new_metarange.save()
+            
+            new_commit.remove.add(*list_of_file_obj_delete)
+            new_commit.save()
 
-        return Response({"commit_id": new_commit.commit_id}, status=status.HTTP_201_CREATED)
+ 

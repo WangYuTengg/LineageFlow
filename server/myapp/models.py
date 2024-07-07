@@ -14,7 +14,9 @@ class Item(models.Model):
 # file.range -> to get the range of the file
 class File(models.Model):
     id = models.BigAutoField(primary_key=True)
-    url = models.URLField()
+    file_name = models.TextField()
+    # gc bucket link 
+    loc = models.URLField()
     meta_data = models.TextField()
     version = models.IntegerField(default=1)
     created_timestamp = models.DateTimeField(auto_now_add=True)
@@ -24,13 +26,11 @@ class File(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    metarange = models.ForeignKey("MetaRange", on_delete=models.CASCADE, related_name="files")
-
     class Meta:
-        unique_together = ('url', 'metarange')
+        unique_together = ('file_name', 'version')
 
     def __str__(self):
-        return self.url
+        return self.file_name
 
 
 #  range.metaranges.all() -> to get metaranges of a range
@@ -39,6 +39,7 @@ class File(models.Model):
 class Range(models.Model):
     range_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_timestamp = models.DateTimeField(auto_now_add=True)
+    size = models.BigIntegerField(default=0)
 
     def __str__(self):
         return str(self.range_id)
@@ -55,6 +56,7 @@ class MetaRange(models.Model):
         "Commit", related_name="meta_range", on_delete=models.CASCADE, null=True
     )
 
+    
     def __str__(self):
         return str(self.meta_id)
 

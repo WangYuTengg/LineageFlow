@@ -42,8 +42,12 @@ export interface MetaData {
 }
 
 export interface FileResource {
+  id: number;
+  file_name: string;
+  loc: string;
   meta_data: MetaData;
-  url: string;
+  version: number;
+  range: number;
 }
 
 export const createRepositorySchema = z.object({

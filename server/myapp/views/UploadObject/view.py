@@ -4,12 +4,14 @@ from rest_framework import status
 from django.utils import timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from myapp.models import Branch, Repo, Range, Commit, MetaRange, File
-from myapp.serializers import FilesSerializer
 from myapp.gcs_utils import GCS
 from django.db import transaction, IntegrityError, DatabaseError
 from rest_framework.exceptions import ValidationError
 import json
 import logging
+from urllib.parse import quote, urlparse
+import re
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,11 @@ class UploadObjectView(APIView):
         files = request.FILES.getlist('files')
         relative_paths = request.data.getlist('relative_paths')
         storage_bucket = request.data.get('storage_bucket')
+        
+        for r in relative_paths:
+            print(r)
+        
+        print(storage_bucket)
 
         try:
             repo = Repo.objects.get(repo_name=repo_name)
@@ -53,10 +60,23 @@ class UploadObjectView(APIView):
             with ThreadPoolExecutor() as executor:
                 futures = []
                 for file, relative_path in zip(files, relative_paths):
-                    existing_file = File.objects.filter(url__startswith=relative_path).first()
+                    # Construct the query
+                    parsed_url = urlparse(storage_bucket)
+                    # Split the path and extract the bucket name
+                    bucket_name = parsed_url.path.split('/')[1]
+                    # Construct the query with the adjusted bucket name
+                    query = f"https://storage.googleapis.com/{bucket_name}/{quote(relative_path)}"
+                    print(f"Constructed Query: {query}")
+
+                    # Attempt to filter with the constructed query
+                    existing_file = File.objects.filter(url__contains=query).first()
+                    
+                    version = 0
+
                     if existing_file:
                         edited_files.append(existing_file)
-                        version = existing_file.version + 1
+                        existing_file.version += 1
+                        version = existing_file.version
                     else:
                         version = 1
                     futures.append(executor.submit(gcs.upload_and_get_metadata, file, relative_path, storage_bucket, version))
@@ -74,109 +94,69 @@ class UploadObjectView(APIView):
 
             with transaction.atomic():
                 latest_commit = branch.commits.first()
-                new_metarange = MetaRange.objects.create()
-                logger.info(f"New MetaRange created: {new_metarange.meta_id}")
-
-                ranges = gcs.group_into_ranges(object_metadata)
                 
-                for range_subset in ranges: 
-                    new_range = Range.objects.create()
-                    
-                    for url, metadata in range_subset.items():
-                        try:
-                            file_data = {
-                                'url': url,
-                                'meta_data': json.dumps(metadata),
-                                'range': new_range.range_id,  # Ensure range_id is used
-                                'metarange': new_metarange.meta_id  # Pass the actual MetaRange instance
-                            }
-                            files_serializer = FilesSerializer(data=file_data)
-                            if files_serializer.is_valid():
-                                new_file_instance = files_serializer.save()
-                                logger.info(f"New File created: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
-                                new_files.append(new_file_instance)
-                            else:
-                                logger.error(f"Serializer errors: {files_serializer.errors}")
-                                return Response(files_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                        except IntegrityError as e:
-                            logger.error(f"Integrity error while saving new file: {e}")
-                            return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                        except DatabaseError as e:
-                            logger.error(f"Database error while saving new file: {e}")
-                            return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                    
-                    new_metarange.ranges.add(new_range)
-                    logger.info(f"New range added to MetaRange: {new_range.range_id}")
-
-                new_metarange.save()
-
-                new_commit = Commit.objects.create(
-                    branch=branch,
-                    created_timestamp=timezone.now(),
-                    meta_range=new_metarange  # Ensure the new commit is linked to the new MetaRange
-                )
-                new_commit.add.set(new_files)
-                new_commit.save()
-                logger.info(f"New commit created: {new_commit.commit_id}")
-                
-                new_metarange.commit = new_commit
-                new_metarange.save()
-
                 if latest_commit:
                     existing_ranges = list(latest_commit.meta_range.ranges.all())
                     updated_ranges = existing_ranges.copy()
                     processed_ranges = {}
 
                     for file_data in object_metadata:
-                        # Find the correct range for the file and assign it
+                        range_found = False
                         for range_subset in updated_ranges:
+                            print(file_data['meta_data'])
+                            print("file.url ", r )
                             if file_data['url'] in [file.url for file in range_subset.files.all()]:
                                 file_data['range'] = range_subset.range_id
+                                range_found = True
                                 break
 
-                        file_data['metarange'] = new_metarange.meta_id  # Pass the actual MetaRange instance
-                        files_serializer = FilesSerializer(data=file_data)
-                        if files_serializer.is_valid():
-                            try:
-                                existing_file = next((f for f in edited_files if f.url == file_data['url']), None)
-                                if existing_file:
-                                    existing_file.version += 1
-                                    existing_file.meta_data = file_data['meta_data']
-                                    existing_file.metarange = new_metarange
-                                    existing_file.range_id = file_data['range']  # Set the range correctly
-                                    logger.info(f"Before save - Updated File: {existing_file.url}, MetaRange: {existing_file.metarange.meta_id}")
-                                    existing_file.save()
-                                    logger.info(f"After save - Updated File: {existing_file.url}, MetaRange: {existing_file.metarange.meta_id}")
+                        if not range_found:
+                            new_range = Range.objects.create()
+                            file_data['range'] = new_range.range_id
+                            updated_ranges.append(new_range)
+                            logger.info(f"Created new range for file data: {file_data['url']} with range ID: {new_range.range_id}")
+                            
+                        new_metarange = MetaRange.objects.create()
+                        file_data['metarange'] = new_metarange.meta_id
+                        try:
+                            existing_file = next((f for f in edited_files if f.url == file_data['url']), None)
+                            if existing_file:
+                                existing_file.meta_data = json.dumps(file_data['meta_data'])
+                                existing_file.metarange = new_metarange
+                                existing_file.range_id = file_data['range']
+                                existing_file.save()
+                                logger.info(f"Updated File: {existing_file.url}, MetaRange: {existing_file.metarange.meta_id}")
 
-                                    old_range = existing_file.range
-                                    if old_range in processed_ranges:
-                                        new_range_excluding_edited = processed_ranges[old_range]
-                                    else:
-                                        old_range_files = list(old_range.files.all())
-                                        old_range_files.remove(existing_file)
-                                        new_range_excluding_edited = Range.objects.create()
-                                        new_range_excluding_edited.files.set(old_range_files)
-                                        processed_ranges[old_range] = new_range_excluding_edited
-
-                                    updated_ranges = [r for r in updated_ranges if r != old_range]
-                                    updated_ranges.append(new_range_excluding_edited)
-                                    logger.info(f"Range {old_range.range_id} processed and replaced with {new_range_excluding_edited.range_id}")
-
+                                old_range = existing_file.range
+                                if old_range in processed_ranges:
+                                    new_range_excluding_edited = processed_ranges[old_range]
                                 else:
-                                    new_file_instance = files_serializer.save()
-                                    new_file_instance.range_id = file_data['range']  # Set the range correctly
-                                    new_file_instance.save()
-                                    logger.info(f"New File created in existing commit: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
-                                    new_files.append(new_file_instance)
-                            except IntegrityError as e:
-                                logger.error(f"Integrity error while saving file: {e}")
-                                return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                            except DatabaseError as e:
-                                logger.error(f"Database error while saving file: {e}")
-                                return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                        else:
-                            logger.error(f"Serializer errors: {files_serializer.errors}")
-                            return Response(files_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                                    old_range_files = list(old_range.files.all())
+                                    old_range_files.remove(existing_file)
+                                    new_range_excluding_edited = Range.objects.create()
+                                    new_range_excluding_edited.files.set(old_range_files)
+                                    processed_ranges[old_range] = new_range_excluding_edited
+
+                                updated_ranges = [r for r in updated_ranges if r != old_range]
+                                updated_ranges.append(new_range_excluding_edited)
+                                logger.info(f"Range {old_range.range_id} processed and replaced with {new_range_excluding_edited.range_id}")
+
+                            else:
+                                new_file_instance = File.objects.create(
+                                    url=file_data['url'],
+                                    meta_data=json.dumps(file_data['meta_data']),
+                                    range_id=file_data['range'],
+                                    metarange=new_metarange
+                                )
+                                new_file_instance.save()
+                                logger.info(f"New File created in existing commit: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
+                                new_files.append(new_file_instance)
+                        except IntegrityError as e:
+                            logger.error(f"Integrity error while saving file: {e}")
+                            return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        except DatabaseError as e:
+                            logger.error(f"Database error while saving file: {e}")
+                            return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                     new_meta_obj = MetaRange.objects.create()
                     new_meta_obj.ranges.set(updated_ranges)
@@ -186,7 +166,6 @@ class UploadObjectView(APIView):
                     new_commit = Commit.objects.create(
                         branch=branch,
                         created_timestamp=timezone.now(),
-                        meta_range=new_meta_obj  # Ensure the new commit is linked to the updated MetaRange
                     )
                     new_commit.add.set(new_files)
                     new_commit.edit.set(edited_files)
@@ -196,6 +175,48 @@ class UploadObjectView(APIView):
                     new_meta_obj.commit = new_commit
                     new_meta_obj.save()
 
+                else: 
+                    new_metarange = MetaRange.objects.create()
+                    logger.info(f"New MetaRange created: {new_metarange.meta_id}")
+
+                    ranges = gcs.group_into_ranges(object_metadata)
+                    
+                    for range_subset in ranges: 
+                        new_range = Range.objects.create()
+                        for url, metadata in range_subset.items():
+                            try:
+                                new_file_instance = File.objects.create(
+                                    url=url,
+                                    meta_data=json.dumps(metadata),
+                                    range=new_range,
+                                    metarange=new_metarange
+                                )
+                                logger.info(f"New File created: {new_file_instance.url}, MetaRange: {new_file_instance.metarange.meta_id}")
+                                new_files.append(new_file_instance)
+                            except IntegrityError as e:
+                                logger.error(f"Integrity error while saving new file: {e}")
+                                return Response({"error": f"Integrity error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            except DatabaseError as e:
+                                logger.error(f"Database error while saving new file: {e}")
+                                return Response({"error": f"Database error while saving file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        
+                        new_metarange.ranges.add(new_range)
+                        logger.info(f"New range added to MetaRange: {new_range.range_id}")
+
+                    new_metarange.save()
+
+                    new_commit = Commit.objects.create(
+                        branch=branch,
+                        created_timestamp=timezone.now(),
+                    )
+                    new_commit.add.set(new_files)
+                    new_commit.save()
+                    logger.info(f"New commit created: {new_commit.commit_id}")
+                    
+                    new_metarange.commit = new_commit
+                    new_metarange.save()
+
+                
             return Response({"commit_id": new_commit.commit_id}, status=status.HTTP_201_CREATED)
 
         except ValidationError as ve:

@@ -13,12 +13,11 @@ from django.db import transaction, IntegrityError
 
 
 class FilesSerializer(serializers.ModelSerializer):
-    metarange = serializers.PrimaryKeyRelatedField(queryset=MetaRange.objects.all(), required=True)
     range = serializers.PrimaryKeyRelatedField(queryset=Range.objects.all(), required=True)
 
     class Meta:
         model = File
-        fields = ["url", "meta_data", "metarange", "range"]
+        fields = ["id", "file_name", "loc", "meta_data", "version", "range"]  # include other necessary fields
 
     def create(self, validated_data):
         return File.objects.create(**validated_data)

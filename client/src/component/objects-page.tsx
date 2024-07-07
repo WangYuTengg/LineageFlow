@@ -63,13 +63,29 @@ export default function ObjectsPage({
       );
       const data: { files: FileResource[] } = await response.json();
       const files = data.files.flat(1).map((file) => {
-        const parseOnce = JSON.parse(file.meta_data as unknown as string);
+        let metaData = file.meta_data;
+        try {
+          if (typeof metaData === "string") {
+            metaData = JSON.parse(metaData);
+          }
+          // Check if metaData is still a string and attempt to parse again
+          if (typeof metaData === "string") {
+            metaData = JSON.parse(metaData);
+          }
+        } catch (e) {
+          console.error("Error parsing meta_data:", e);
+          console.error("Problematic meta_data:", metaData);
+          // Optionally, you can assign a default value or keep the original string
+          metaData = { name: "Unknown", size: 0, content_type: "unknown", updated: "", generation: 0, metageneration: 0 };
+        }
         return {
           ...file,
-          meta_data: JSON.parse(parseOnce as unknown as string),
+          meta_data: metaData,
         };
       });
+
       if (response.ok) {
+        console.log(files)
         handleChangeState("fileResources", files);
       } else {
         alert("Internal server error");
