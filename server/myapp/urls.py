@@ -11,6 +11,7 @@ from .views.Login.view import (
     LoginView,
     CreateUserView,
 )
+from .views.RevertCommit.view import RevertCommit
 
 urlpatterns = [
     # LOGIN APIs
@@ -21,6 +22,7 @@ urlpatterns = [
     path("getObjects/", GetObjectsView.as_view(), name="get-objects"),
     path("getCommitData/", FetchLatestCommitDataView.as_view(), name="get-commit-data"),
     path("getCommitsOfBranch/", CommitView.as_view(), name="get-commits-of-branch"),
+    path("getRevertCommit/", RevertCommit.as_view(), name="get-revert-commit"),
     # CREATE APIs
     path("onboard/", OnboardingView.as_view(), name="onboard"),  # Creating repo
     path("upload/", Test.as_view(), name="upload"),
