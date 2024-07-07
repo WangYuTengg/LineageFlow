@@ -87,7 +87,7 @@ Aim:
 
 *Features:*
 - Direct storage and retrieval of data from Google Cloud Bucket
-- Automated backup and restore functionalities
+- Restore functionalities
 - Scalable storage solutions
 
 ## Roadmap for Scalability and Availability
