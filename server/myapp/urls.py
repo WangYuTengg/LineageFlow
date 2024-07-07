@@ -5,11 +5,13 @@ from .views.GetAllObject.view import GetObjectsView
 from .views.onboard.view import OnboardingView
 from .views.DeleteFiles.view import DeleteFile
 from .views.FetchFiles.view import FetchLatestCommitDataView
+from .views.Login.view import (
+    LoginView,
+    CreateUserView,
+)
 from .view import (
     CommitView,
     BranchView,
-    LoginView,
-    CreateUserView,
 )
 
 urlpatterns = [
@@ -20,6 +22,7 @@ urlpatterns = [
     path("getAllRepo/", GetRepoView.as_view(), name="get-repos"),
     path("getObjects/", GetObjectsView.as_view(), name="get-objects"),
     path("getCommitData/", FetchLatestCommitDataView.as_view(), name="get-commit-data"),
+    path("getCommitsOfBranch/", CommitView.as_view(), name="get-commits-of-branch"),
     # CREATE APIs
     path("onboard/", OnboardingView.as_view(), name="onboard"),  # Creating repo
     path("upload/", Test.as_view(), name="upload"),
