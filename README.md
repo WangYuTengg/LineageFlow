@@ -61,7 +61,7 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 Aim:
 - Enable users to track changes in their datasets using Git-like semantics.
 
-*Features:*
+*Current Features:*
 - Branches, commits, merges, and rollbacks
 - Blame functionality to identify the origin of each data change
 - Ability to view datasets as they appeared before transformations
@@ -100,5 +100,3 @@ Aim:
 * [Jayden](https://github.com/MomPansy) - Fullstack
 * [Wang Yu Teng](https://github.com/WangYuTengg) - Fullstack 
 * [Pei Yee](https://github.com/heypeiyee) - Database, Backend
-
-Feel free to customize the links and content as needed for your specific project.
