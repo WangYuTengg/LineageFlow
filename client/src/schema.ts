@@ -5,7 +5,7 @@ export interface UncommittedChanges {
   branch: string;
   storage_bucket: string;
   changes: {
-    file: File;
+    file: File | FileResource;
     type: string;
   }[];
 }

@@ -25,8 +25,8 @@ const tabsData = [
     iconComponent: IconCancel,
     label: "Uncommitted Changes",
   },
-  { value: "commits", iconComponent: IconGitCommit, label: "Commits" },
   { value: "branches", iconComponent: IconGitBranch, label: "Branches" },
+  { value: "commits", iconComponent: IconGitCommit, label: "Commits" },
   { value: "settings", iconComponent: IconSettings, label: "Settings" },
 ];
 

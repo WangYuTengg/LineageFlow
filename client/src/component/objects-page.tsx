@@ -37,6 +37,7 @@ export default function ObjectsPage({
     fileResources: [] as FileResource[],
   });
   const [filesToDelete, setFilesToDelete] = useState<FileResource[]>([]);
+  const [showNotif, setShowNotif] = useState(true);
   const [uncommittedChanges, setUncommittedChanges] =
     useState<UncommittedChanges | null>(null);
 
@@ -80,16 +81,13 @@ export default function ObjectsPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.refresh]);
 
-  async function handleDeleteFiles() {
-    // Delete files logic
-  }
-
   return (
     <Stack px="8%">
-      {uncommittedChanges && (
+      {showNotif && uncommittedChanges && (
         <Notification
           mt="lg"
           color="red"
+          onClose={() => setShowNotif(false)}
           title="We notify you that:"
           icon={<IconExclamationMark />}
         >
@@ -155,8 +153,21 @@ export default function ObjectsPage({
         />
       )}
       {filesToDelete.length > 0 && (
-        <Group justify="flex-end" onClick={handleDeleteFiles}>
-          <Button color="red">
+        <Group justify="flex-end">
+          <Button
+            color="red"
+            onClick={() =>
+              setUncommittedChanges({
+                repo: repository.repo_name,
+                branch: state.selectedBranch,
+                storage_bucket: repository.bucket_url,
+                changes: filesToDelete.map((file) => ({
+                  file,
+                  type: "Delete",
+                })),
+              })
+            }
+          >
             Confirm Delete {filesToDelete.length} file
             {filesToDelete.length > 1 && "s"}
           </Button>

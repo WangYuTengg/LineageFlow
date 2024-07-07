@@ -27,25 +27,26 @@ export default function UncommittedChangesPage({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUpload = async () => {
-    setIsLoading(true);
     if (!uncommittedChanges) return;
+    setIsLoading(true);
     try {
       const formData = new FormData();
-
       formData.append("repo", uncommittedChanges.repo);
       formData.append("branch", uncommittedChanges.branch);
       formData.append("storage_bucket", uncommittedChanges.storage_bucket);
       formData.append("commit_message", commitMessage);
       uncommittedChanges.changes.forEach((change) => {
-        formData.append("files", change.file);
-        formData.append("relative_paths", change.file.webkitRelativePath);
+        if (change.type === "Add") {
+          const file = change.file as File;
+          formData.append("files", file as File);
+          formData.append("relative_paths", file.webkitRelativePath);
+        }
       });
-
       const response = await fetch("/api/upload/", {
         method: "POST",
         body: formData,
       });
-      console.log(response);
+
       if (response.ok) {
         alert("Files uploaded successfully");
         onDone();
@@ -83,13 +84,20 @@ export default function UncommittedChangesPage({
                     : "rgba(100, 255, 255, 0.1)"
               }
             >
-              <Group px="xl">
+              <Group px="xl" py="sm" align="center">
                 {change.type === "Add" && <IconPlus />}
                 {change.type === "Delete" && <IconMinus />}
                 {change.type === "Modify" && <IconPencil />}
-                <Text size="md" fw={400}>
-                  {change.file.name}
-                </Text>
+                {change.type === "Add" && (
+                  <Text size="md" fw={400}>
+                    {change.file.name}
+                  </Text>
+                )}
+                {change.type === "Delete" && (
+                  <Text size="md" fw={400}>
+                    {change.file.meta_data.name}
+                  </Text>
+                )}
               </Group>
             </Group>
           ))}
