@@ -20,7 +20,7 @@ interface Props {
   selectedRepository: Repository;
 }
 
-function timeAgo(dateString: string) {
+export function timeAgo(dateString: string) {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);

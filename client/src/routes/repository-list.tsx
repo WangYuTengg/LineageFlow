@@ -1,6 +1,5 @@
 import {
   Anchor,
-  Box,
   Card,
   Code,
   Divider,
@@ -14,6 +13,7 @@ import { useAuth } from "../auth";
 import { useNavigate } from "react-router-dom";
 import CreateRepository from "../component/create-repo-button";
 import { Repository } from "../schema";
+import { timeAgo } from "../component/branches-page";
 
 export default function Repositories() {
   const navigate = useNavigate();
@@ -73,31 +73,12 @@ export default function Repositories() {
           <Text size="lg" fw={500}>
             Bucket Name: {repo.bucket_url.split(".com/")[1].split("/")[0]}
           </Text>
-          <Text size="lg" fw={500}>
-            Branches:
+          <Text size="lg">
+            Created at: {new Date(repo.created_timestamp).toLocaleDateString()}
           </Text>
-          {repo.branches.map((branch) => (
-            <Box key={branch.branch_name} px="lg">
-              <Text size="md" fw={500}>
-                Branch Name: {branch.branch_name}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Created at:{" "}
-                {new Date(branch.created_timestamp).toLocaleString()}
-              </Text>
-              <Text size="sm" c="dimmed">
-                Updated at:{" "}
-                {new Date(branch.updated_timestamp).toLocaleString()}
-              </Text>
-              {branch.latest_commit ? (
-                <Text size="sm" c="dimmed">
-                  Commit ID: {JSON.stringify(branch.latest_commit)}
-                </Text>
-              ) : (
-                <Text c="dimmed">Commit: No commits yet</Text>
-              )}
-            </Box>
-          ))}
+          <Text size="md" ta="right" c="dimmed">
+            Updated {timeAgo(repo.updated_timestamp)}
+          </Text>
         </Stack>
       </Card>
     );
