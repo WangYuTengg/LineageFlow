@@ -88,7 +88,6 @@ export default function CommitsPage({ selectedRepository }: Props) {
     fetchCommitsOfBranch();
   }, [branches, selectedBranch, refresh]);
 
-  console.log(state);
   return (
     <Stack px="8%">
       <Text size="xl" fw={700} mt="md">
