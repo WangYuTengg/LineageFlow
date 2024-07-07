@@ -11,7 +11,14 @@ Easily track data versions and lineage through the machine learning lifecycle.
     - [Architecture](#architecture)
     - [Database Design](#database-design)
 - [Features](#features)
-- [Future Plans](#roadmap-for-scalability-and-availability)
+    - [Features](#features)
+    - [Repositories](#repository)
+    - [Objects view](#objects)
+    - [Staging area](#staging)
+    - [Branches](#branches)
+    - [Commits](#commits)
+    - [Settings](#settings)
+- [Future Plans](#future-plans)
 - [Challenges](#challenges-faced)
 - [Contributors](#-contributors)
 
@@ -20,7 +27,7 @@ Easily track data versions and lineage through the machine learning lifecycle.
 How can we develop a tool that tracks data versions and lineage through the machine learning lifecycle, helping data scientists understand how datasets have changed over time and how different versions of datasets affect model performance?
 
 ### <a name="motivation"></a>💡 Motivation
-As datasets evolve, tracking their changes and understanding their impact on machine learning models becomes increasingly complex. LineageFlow aims to simplify this process by providing an intuitive tool for data versioning and lineage tracking, ensuring data manageability, quality, and reproducibility.
+As datasets evolve, tracking their changes and understanding their impact on machine learning models becomes increasingly complex. LineageFlow aims to simplify this process by providing an intuitive tool for data versioning and lineage tracking, ensuring data manageability, quality, and reproducibility. We strive to build a solid foundation, for everything data, ML & AI related. 
 
 ### <a name="target-audience"></a>🧑 Target Audience
 - Data Scientists and Engineers
@@ -80,10 +87,10 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 
 ## Current Features
 ### <a name='repository'></a> Repositories
-![Repositories Diagram]()
--
--
--
+![Repositories Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/repo-list.JPG)
+- Simple user signup, login and auth flow
+- View your repositories
+- Create a new repository (with an option the repository to existing cloud bucket)
 
 ### <a name='objects'></a> Objects view
 ![Objects Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/objects-page.JPG)
@@ -116,16 +123,20 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 - View collaborators
 
 ## Future Plans
--
--
--
--
+- Immediate improvements to be made are: 
+    - **Cloud Integration**: Incorporate other cloud buckets (e.g. AWS S3, Azure blob storage, CloudFare R2 etc.)
+    - **Collaboration**: Enable collaboration through adding user roles, invites, branch merging etc.
+    - **Deployment**: Deploy our product to quickly iterate based on real usage.
+
+- The possibilities are endless:
+    - **Feature Store**: Integrate a feature store to manage and share features across different machine learning models, ensuring consistency and reusability.
+    - **Automated ML Pipeline**: Develop automated machine learning pipelines to streamline data preprocessing, model training, evaluation, and deployment, increasing efficiency and reducing manual intervention.
+    - **Data Quality Monitoring**: Implement data quality monitoring and alerting systems to detect anomalies, ensuring data integrity and reliability throughout the machine learning lifecycle.
 
 ## Challenges Faced
-- 
-- 
-- 
--
+- Designing the database correctly was most crucial and we should have spent more time on it, a lot of time was wasted on re-migrations because we realised our database schemas did not work.
+- Integration with google cloud bucket proved to be technically difficult, facing issues such as authentication 
+- Underestimated scope of project and faced time constraints
 
 ## ✍🏻 Contributors
 * [Jayden](https://github.com/MomPansy) - Fullstack
