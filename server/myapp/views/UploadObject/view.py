@@ -23,6 +23,9 @@ class UploadObjectView(APIView):
         relative_paths = request.data.getlist('relative_paths')
         storage_bucket = request.data.get('storage_bucket')
         
+        for r in relative_paths:
+            print(r)
+        
         print(storage_bucket)
 
         try:
@@ -100,6 +103,8 @@ class UploadObjectView(APIView):
                     for file_data in object_metadata:
                         range_found = False
                         for range_subset in updated_ranges:
+                            print(file_data['meta_data'])
+                            print("file.url ", r )
                             if file_data['url'] in [file.url for file in range_subset.files.all()]:
                                 file_data['range'] = range_subset.range_id
                                 range_found = True
