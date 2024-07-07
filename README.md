@@ -9,12 +9,11 @@ Easily track data versions and lineage through the machine learning lifecycle.
     - [Value Proposition](#value-proposition)
     - [Tech Stack](#tech-stack)
     - [Architecture](#architecture)
+    - [Database Design](#database-design)
 - [Features](#features)
-    - [Data Versioning](#data-versioning)
-    - [Lineage Tracking](#lineage-tracking)
-    - [Collaboration](#collaboration)
-    - [Google Cloud Integration](#google-cloud-integration)
-- [Roadmap for Scalability and Availability](#roadmap-for-scalability-and-availability)
+- [Future Plans](#roadmap-for-scalability-and-availability)
+- [Challenges](#challenges-faced)
+- [Contributors](#-contributors)
 
 ## About
 ### <a name="problem-statement"></a>❓ Problem Statement
@@ -50,51 +49,55 @@ LineageFlow leverages Git-like semantics such as branches, commits, merges, and 
 - Django REST Framework
 
 **Storage**:
-- Supabase PostgresSQL for storing file object pointers
-- Google Cloud Bucket for storing file objects
+- Supabase PostgresSQL
+- Google Cloud Storage
 
 ### <a name="architecture"></a>🔨 Architecture
-![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/architecture-diagram.jpg)
+![Architecture Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/architecture-diagram.jpg)
+- We store our actual objects and data in Google Cloud Storage, and pointers to the data in our Postgres SQL Database
 
-## Features
-### <a name="data-versioning"></a>📂 Data Versioning
-Aim:
-- Enable users to track changes in their datasets using Git-like semantics.
+### <a name='database-design'></a>🛠️ Database design
+![Data Hierarchy Diagram](https://github.com/WangYuTengg/LineageFlow/blob/main/assets/data_hierarchy.jpg)
+- In order to support data-versioning using Git-like semantics, we followed the above data hierarchy which sculpted our database schemas and design decisions.
+- With this, we are able to implement version control when operations such as add, delete, and edit are done on the data.
 
-*Current Features:*
-- Branches, commits, merges, and rollbacks
-- Blame functionality to identify the origin of each data change
-- Ability to view datasets as they appeared before transformations
+<ul>
+  <li>
+    1. Adding Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/adding_objects.jpg" alt="Add Object Diagram">
+  </li>
+  <li>
+    2. Deleting Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/deleting_objects.jpg" alt="Delete Object Diagram">
+  </li>
+  <li>
+    3. Editing Objects
+    <br>
+    <img src="https://github.com/WangYuTengg/LineageFlow/blob/main/assets/editing_objects.jpg" alt="Edit Object Diagram">
+  </li>
+</ul>
 
-### <a name="lineage-tracking"></a>🗂 Lineage Tracking
-Aim:
-- Provide comprehensive tracking of data lineage to ensure reproducibility and quality.
-
-*Features:*
-- Detailed lineage graphs
-- Visualization of data transformations
-- Impact analysis of dataset changes on models
-
-### <a name="collaboration"></a>🤝 Collaboration
-Aim:
-- Facilitate collaboration among data practitioners.
-
-*Features:*
-- Shared repositories for datasets
-- Collaborative editing and version control
-- Role-based access control
-
-### <a name="google-cloud-integration"></a>☁️ Google Cloud Integration
-Aim:
-- Seamless integration with Google Cloud Storage for managing data.
-
-*Features:*
-- Direct storage and retrieval of data from Google Cloud Bucket
-- Restore functionalities
-- Scalable storage solutions
+## Current Features
+- 
+-
+-
+-
+-
+-
 
 ## Future Plans
+-
+-
+-
+-
 
+## Challenges Faced
+- 
+- 
+- 
+-
 
 ## ✍🏻 Contributors
 * [Jayden](https://github.com/MomPansy) - Fullstack
