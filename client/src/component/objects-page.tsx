@@ -76,7 +76,14 @@ export default function ObjectsPage({
           console.error("Error parsing meta_data:", e);
           console.error("Problematic meta_data:", metaData);
           // Optionally, you can assign a default value or keep the original string
-          metaData = { name: "Unknown", size: 0, content_type: "unknown", updated: "", generation: 0, metageneration: 0 };
+          metaData = {
+            name: "Unknown",
+            size: 0,
+            content_type: "unknown",
+            updated: "",
+            generation: 0,
+            metageneration: 0,
+          };
         }
         return {
           ...file,
@@ -85,7 +92,6 @@ export default function ObjectsPage({
       });
 
       if (response.ok) {
-        console.log(files)
         handleChangeState("fileResources", files);
       } else {
         alert("Internal server error");
@@ -129,7 +135,10 @@ export default function ObjectsPage({
           <ActionIcon
             size="lg"
             variant="subtle"
-            onClick={() => handleChangeState("refresh", !state.refresh)}
+            onClick={() => {
+              handleChangeState("refresh", !state.refresh);
+              setFilesToDelete([]);
+            }}
           >
             <IconRefresh />
           </ActionIcon>
